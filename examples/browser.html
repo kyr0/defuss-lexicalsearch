@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<title>defuss-lexicalsearch example</title>
+<style>
+  :root{color-scheme:light dark;font:17px/1.5 system-ui,sans-serif}
+  body{max-width:760px;margin:8vh auto;padding:0 24px}
+  h1{font-size:2rem;letter-spacing:-.04em;margin-bottom:.3em}
+  input[type=search]{width:100%;box-sizing:border-box;padding:14px;font:inherit;border:1px solid #8888;border-radius:8px}
+  .options{display:flex;gap:24px;margin:16px 0}
+  li{margin:18px 0} small,#status{opacity:.7} code{font-size:.85em}
+</style>
+<h1>defuss-lexicalsearch</h1>
+<p>Local ranked text search. Try <code>search</code>, <code>databse</code>, <code>"exact phrase"</code>, or <code>pref</code>.</p>
+<label for="query">Search documents</label>
+<input id="query" type="search" value="search" autocomplete="off">
+<div class="options">
+  <label><input type="checkbox" id="prefix" checked> Prefix</label>
+  <label><input type="checkbox" id="fuzzy" checked> Typos</label>
+</div>
+<p id="status" role="status">Loading…</p>
+<ol id="results"></ol>
+<p><a href="/examples/api.html">API and symbol search example</a></p>
+<script type="module">
+  import { LexicalSearch } from '../dist/index.js';
+  const index = new LexicalSearch({ fields: { title: { weight: 2 }, body: {} } });
+  index.addAll([
+    { id: 'lexical', fields: { title: 'Classic text search', body: 'BM25 ranks documents using term frequency and document length.' } },
+    { id: 'database', fields: { title: 'Local database', body: 'Keep your search index in a browser or a server process.' } },
+    { id: 'phrase', fields: { title: 'Phrase search', body: 'An exact phrase must contain adjacent analyzed tokens in the same field.' } },
+    { id: 'prefix', fields: { title: 'Prefix search', body: 'Type the beginning of a word to search the vocabulary trie.' } },
+  ]);
+  window.demoIndex = index;
+  const query = document.querySelector('#query');
+  function render() {
+    const list = document.querySelector('#results'); list.replaceChildren();
+    try {
+      const response = index.searchWithStats(query.value, {
+        prefix: document.querySelector('#prefix').checked,
+        fuzzy: document.querySelector('#fuzzy').checked, transpositions: true,
+      });
+      for (const hit of response.hits) {
+        const li = document.createElement('li'), title = document.createElement('strong'), detail = document.createElement('small');
+        title.textContent = index.get(hit.id).fields.title;
+        detail.textContent = ` — score ${hit.score.toFixed(3)} · ${hit.id}`;
+        li.append(title, detail); list.append(li);
+      }
+      document.querySelector('#status').textContent = `${response.total} results · ${response.stats.postingsVisited} postings visited`;
+    } catch (error) { document.querySelector('#status').textContent = error.message; }
+  }
+  for (const element of document.querySelectorAll('input')) element.addEventListener('input', render);
+  render();
+</script>
+</html>

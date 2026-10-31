@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<title>API search · defuss-lexicalsearch</title>
+<style>
+:root{color-scheme:light dark;font:16px/1.5 system-ui,sans-serif}body{max-width:850px;margin:6vh auto;padding:0 24px}h1{letter-spacing:-.04em}input[type=search]{width:100%;box-sizing:border-box;padding:14px;font:inherit;border:1px solid #8888;border-radius:8px}.controls{display:flex;gap:18px;flex-wrap:wrap;margin:18px 0}select{font:inherit}li{margin:20px 0}small{display:block;opacity:.7}code{font-family:monospace}#status{min-height:1.5em}a{color:inherit}
+</style>
+<h1>API search</h1>
+<p>Search symbols and descriptions. Try <code>C++</code>, <code>operator==</code>, <code>@scope/pkg</code>, <code>prottoype</code>, or <code>Array.prototype.ma</code>.</p>
+<label for="query">Query</label><input id="query" type="search" value="C++" autocomplete="off">
+<div class="controls">
+<label>Match <select id="mode"><option value="lexical">Ranked lexical</option><option value="exact">Literal equality</option><option value="prefix">Literal prefix</option><option value="suffix">Literal suffix</option><option value="substring">Literal substring</option></select></label>
+<label><input type="checkbox" id="prefix" checked> Completion</label>
+<label><input type="checkbox" id="fuzzy" checked> Typos</label>
+<label><input type="checkbox" id="case" checked> Case-sensitive literals</label>
+</div>
+<p id="status" role="status"></p><ol id="results"></ol><p><a href="/examples/browser.html">Text-search example</a></p>
+<script type="module">
+import { LexicalSearch, apiSearchPreset } from '../dist/index.js';
+const index = new LexicalSearch(apiSearchPreset);
+const documents = [
+ ['cpp','C++','Systems programming language.'],['csharp','C#','Managed programming language.'],['c','C','C language reference.'],
+ ['map','Array.prototype.map','Transform each array element.'],['package','@scope/pkg','Scoped package import.'],
+ ['equal','operator==','Equality operator.'],['unequal','operator!=','Inequality operator.'],
+ ['route','GET /v1/users/{id}','Retrieve a user by identifier.'],['fetch','fetch','Request a resource.'],['fetchall','fetchAll','Request several resources.'],
+];
+index.addAll(documents.map(([id,symbol,description])=>({id,fields:{symbol,description}})));
+window.apiIndex = index;
+function render(){
+ const list=document.querySelector('#results');list.replaceChildren();
+ try{
+  const mode=document.querySelector('#mode').value;
+  const lexical=mode==='lexical';
+  document.querySelector('#prefix').disabled=!lexical;document.querySelector('#fuzzy').disabled=!lexical;
+  const response=index.searchWithStats(document.querySelector('#query').value,{
+   mode,caseSensitive:document.querySelector('#case').checked,
+   ...(lexical?{prefix:document.querySelector('#prefix').checked,fuzzy:document.querySelector('#fuzzy').checked,transpositions:true}:{fields:['symbol']}),
+  });
+  for(const hit of response.hits){
+   const li=document.createElement('li'),symbol=document.createElement('code'),description=document.createElement('div'),detail=document.createElement('small');
+   const fields=index.get(hit.id).fields;symbol.textContent=fields.symbol;description.textContent=fields.description;
+   detail.textContent=`${hit.tier} · score ${hit.score.toFixed(3)}`;li.dataset.id=hit.id;li.append(symbol,description,detail);list.append(li);
+  }
+  document.querySelector('#status').textContent=`${response.total} results`;
+ }catch(error){document.querySelector('#status').textContent=error.message;}
+}
+for(const control of document.querySelectorAll('input,select'))control.addEventListener('input',render);
+render();
+</script>
+</html>

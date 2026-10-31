@@ -1,0 +1,649 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>defuss-lexicalsearch · exact and ranked search in your browser</title>
+  <meta name="description" content="Lexical search for JavaScript and browsers: field-weighted BM25, exact-first ranking, literal symbol matching, phrases, prefixes and typo tolerance, with zero runtime dependencies. Live demo over 410 documentation pages.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237c8cff' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='M21 6H3M10 12H3M10 18H3'/%3E%3Ccircle cx='17' cy='15' r='3'/%3E%3Cpath d='m21 19-1.9-1.9'/%3E%3C/svg%3E">
+  <script>
+    // Before paint, before df$ exists (defuss-shadcn Dark Mode guide): the saved choice, else the OS default.
+    let saved = '';
+    try {
+      const raw = JSON.parse(localStorage.getItem('defuss-shadcn-theme'));
+      saved = raw && raw.format === 'defuss-store' ? raw.value : raw;
+    } catch {}
+    if (saved === 'dark' || (!saved && matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark');
+      document.documentElement.style.colorScheme = 'dark';
+    }
+  </script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/kyr0/defuss-shadcn@0.9.11/dist/components/core.min.css" integrity="sha384-qUQCm/MM2DNkdT3uEdx8Mpocj+GwXlgLat0FnWv657c16tHWOouZFT2nV7kg5pBE" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/kyr0/defuss-shadcn@0.9.11/dist/theme/utils/shapes.min.css" integrity="sha384-ZmqJOMYRZyhvc1zR5eOVub6RQoBcnL3oe8ubon6JcjkLJK/0Fy3THAhfLP8K3C71" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/kyr0/defuss-shadcn@0.9.11/dist/components/all.min.css" integrity="sha384-D6ChEYfIRnfJpWB03vSS4b4b1ZdHsnCNUwg2VBFrBkjDVHIVvdVDXaJ1M2hFAdK2" crossorigin="anonymous">
+  <link rel="stylesheet" href="assets/demo.css">
+</head>
+<body>
+<svg class="sr-only" aria-hidden="true">
+  <symbol id="i-logo" viewBox="0 0 24 24"><path d="M21 6H3M10 12H3M10 18H3"/><circle cx="17" cy="15" r="3"/><path d="m21 19-1.9-1.9"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2m-7.07-17.07 1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14m-7-7 7 7-7 7"/></symbol>
+  <symbol id="i-arrow-down" viewBox="0 0 24 24"><path d="M12 5v14m7-7-7 7-7-7"/></symbol>
+  <symbol id="i-arrow-up" viewBox="0 0 24 24"><path d="m5 12 7-7 7 7M12 19V5"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></symbol>
+  <symbol id="i-terminal" viewBox="0 0 24 24"><path d="m4 17 6-6-6-6m8 14h8"/></symbol>
+  <symbol id="i-cpu" viewBox="0 0 24 24"><rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M15 2v2m0 16v2M2 15h2m-2-6h2m16 6h2m-2-6h2M9 2v2m0 16v2"/></symbol>
+  <symbol id="i-db" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5M3 12a9 3 0 0 0 18 0"/></symbol>
+  <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12.83 2.18 8.58 3.9a1 1 0 0 1 0 1.83l-8.58 3.9a2 2 0 0 1-1.66 0L2.6 7.91a1 1 0 0 1 0-1.83l8.58-3.9a2 2 0 0 1 1.66 0Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65M22 12.65l-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></symbol>
+  <symbol id="i-languages" viewBox="0 0 24 24"><path d="m5 8 6 6m-7 0 6-6 2-3M2 5h12M7 2h1m14 20-5-10-5 10m2-4h6"/></symbol>
+  <symbol id="i-sparkles" viewBox="0 0 24 24"><path d="M9.94 15.5A2 2 0 0 0 8.5 14.06l-6.14-1.58a.5.5 0 0 1 0-.96L8.5 9.94A2 2 0 0 0 9.94 8.5l1.58-6.14a.5.5 0 0 1 .96 0l1.58 6.14a2 2 0 0 0 1.44 1.44l6.14 1.58a.5.5 0 0 1 0 .96l-6.14 1.58a2 2 0 0 0-1.44 1.44l-1.58 6.14a.5.5 0 0 1-.96 0z"/></symbol>
+  <symbol id="i-braces" viewBox="0 0 24 24"><path d="M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5c0 1.1.9 2 2 2h1M16 21h1a2 2 0 0 0 2-2v-5c0-1.1.9-2 2-2a2 2 0 0 1-2-2V5a2 2 0 0 0-2-2h-1"/></symbol>
+  <symbol id="i-bot" viewBox="0 0 24 24"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2m16 0h2m-7-1v2m-6-2v2"/></symbol>
+  <symbol id="i-package" viewBox="0 0 24 24"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12m0 0 8.7-5M12 12 3.3 7"/></symbol>
+  <symbol id="i-sticky" viewBox="0 0 24 24"><path d="M15.5 3H5a2 2 0 0 0-2 2v14c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2V8.5L15.5 3Z"/><path d="M15 3v4a2 2 0 0 0 2 2h4"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M12 7v14M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"/></symbol>
+  <symbol id="i-shuffle" viewBox="0 0 24 24"><path d="m18 14 4 4-4 4M18 2l4 4-4 4M2 18h1.4c1.3 0 2.5-.6 3.3-1.7l6.1-8.6c.7-1.1 2-1.7 3.3-1.7H22M2 6h1.9c1.5 0 2.9.9 3.6 2.2M22 18h-5.9c-1.3 0-2.6-.7-3.3-1.8l-.5-.8"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M10 12.5 8 15l2 2.5m4-5 2 2.5-2 2.5M14 2v4a2 2 0 0 0 2 2h4"/><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></symbol>
+  <symbol id="i-zap" viewBox="0 0 24 24"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></symbol>
+  <symbol id="i-linkedin" viewBox="0 0 24 24"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></symbol>
+  <symbol id="i-external" viewBox="0 0 24 24"><path d="M7 7h10v10M7 17 17 7"/></symbol>
+  <symbol id="i-github" viewBox="0 0 24 24"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.4 5.4 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></symbol>
+</svg>
+
+<div id="top" class="ls-page">
+  <header class="mk-header" data-variant="floating">
+    <div class="mk-header-inner">
+      <a href="#top" class="mk-header-brand"><svg class="ls-icon" aria-hidden="true"><use href="#i-logo"/></svg><span class="mk-header-name">defuss-lexicalsearch</span></a>
+      <nav class="mk-header-nav" aria-label="Main">
+        <ul class="nav-menu-list">
+          <li class="nav-menu-item"><a class="nav-menu-link" href="#demo">Demo</a></li>
+          <li class="nav-menu-item"><a class="nav-menu-link" href="#how">How it works</a></li>
+          <li class="nav-menu-item"><a class="nav-menu-link" href="#bench">Measured</a></li>
+          <li class="nav-menu-item"><a class="nav-menu-link" href="#use">Use it</a></li>
+        </ul>
+      </nav>
+      <div class="mk-header-actions">
+        <button type="button" class="btn mk-header-wide" data-variant="outline" data-size="sm" data-command-trigger="cmd">
+          <svg class="ls-icon" aria-hidden="true"><use href="#i-search"/></svg>Pages
+          <kbd class="kbd-group"><kbd class="kbd">⌘</kbd><kbd class="kbd">K</kbd></kbd>
+        </button>
+        <label class="swap" data-variant="rotate" data-size="sm">
+          <input type="checkbox" id="theme-toggle" aria-label="Dark mode">
+          <span class="swap-on"><svg class="ls-icon" aria-hidden="true"><use href="#i-moon"/></svg></span>
+          <span class="swap-off"><svg class="ls-icon" aria-hidden="true"><use href="#i-sun"/></svg></span>
+        </label>
+        <a class="btn mk-header-wide" data-variant="ghost" data-size="icon" href="https://github.com/kyr0/defuss-lexicalsearch" aria-label="defuss-lexicalsearch on GitHub"><svg class="ls-icon" aria-hidden="true"><use href="#i-github"/></svg></a>
+        <button type="button" class="btn mk-header-menu" data-variant="ghost" data-size="icon" data-sheet-trigger="ls-menu" aria-haspopup="dialog" aria-label="Open menu"><svg class="ls-icon" aria-hidden="true"><use href="#i-menu"/></svg></button>
+      </div>
+    </div>
+    <dialog id="ls-menu" class="sheet" data-side="right" role="dialog" aria-modal="true" aria-labelledby="ls-menu-title">
+      <div class="sheet-content">
+        <div class="sheet-header">
+          <h2 class="sheet-title" id="ls-menu-title">defuss-lexicalsearch</h2>
+        </div>
+        <div class="sheet-body">
+          <p class="mk-header-sheet-label">This page</p>
+          <ul class="mk-header-sheet-nav">
+            <li><a href="#demo" data-sheet-close>Demo <small>Search 410 documentation pages</small></a></li>
+            <li><a href="#how" data-sheet-close>How it works</a></li>
+            <li><a href="#bench" data-sheet-close>Measured</a></li>
+            <li><a href="#use" data-sheet-close>Use it</a></li>
+          </ul>
+        </div>
+        <div class="sheet-footer mk-header-sheet-actions">
+          <a class="btn" data-variant="outline" href="https://github.com/kyr0/defuss-lexicalsearch"><svg class="ls-icon" aria-hidden="true"><use href="#i-github"/></svg>GitHub</a>
+        </div>
+      </div>
+    </dialog>
+  </header>
+
+  <main class="ls-main">
+
+  <section class="parallax" aria-label="Introduction" style="padding-block:clamp(4rem, 10vw, 7rem) 1rem">
+    <div class="parallax-layer" data-depth="far" aria-hidden="true">
+      <div class="pattern-grid" style="width:100%;height:100%;--shape-ink:color-mix(in oklch, var(--foreground) 7%, transparent);--shape-pattern:32px;mask-image:radial-gradient(55% 60% at 50% 45%, #000, transparent 75%)"></div>
+    </div>
+    <div class="parallax-layer" data-depth="mid" aria-hidden="true" style="--parallax-speed:22%;mask-image:linear-gradient(#000 55%, transparent 92%)">
+      <div class="corner-blob" style="position:absolute;inset-block-start:10%;inset-inline-start:8%;width:min(22rem, 45%);aspect-ratio:1;background:color-mix(in oklch, var(--chart-4) 40%, transparent);filter:blur(60px);opacity:.55"></div>
+      <div class="corner-blob-3" style="position:absolute;inset-block-start:28%;inset-inline-end:6%;width:min(18rem, 40%);aspect-ratio:1;background:color-mix(in oklch, var(--chart-2) 40%, transparent);filter:blur(60px);opacity:.5"></div>
+    </div>
+    <div class="parallax-content">
+      <section class="mk-hero" style="width:100%">
+        <div class="mk-hero-copy">
+          <a class="mk-hero-pill" href="#demo"><span class="badge" data-variant="default" data-size="sm" id="hero-version">v0.2.0</span>No server, no API key, nothing leaves your browser <svg class="ls-icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+          <h1 class="mk-hero-title"><strong>Lexical</strong> search that finds the <i>exact</i> word, symbol or phrase</h1>
+          <p class="ls-flip"><span class="text-rotate"><span>
+              <span class="ls-accent">with BM25 relevance ranking</span>
+              <span class="ls-accent">that matches exactly where it matters</span>
+              <span class="ls-accent">that forgives typos and fragments</span>
+              <span class="ls-accent" id="hero-size">in 12&nbsp;kB of gzipped JavaScript</span>
+              <span class="ls-accent">with zero runtime dependencies</span>
+              <span class="ls-accent">in your browser and Node.js</span>
+          </span></span></p>
+          <p class="mk-hero-desc">defuss-lexicalsearch indexes your documents field by field and answers keyword, phrase, prefix, typo and literal queries while you type. <strong>Exact-first ranking</strong> puts the literal match on top, and <strong>field-weighted BM25</strong> orders everything after it. Indexing and search never touch the network.</p>
+          <div class="mk-hero-actions">
+            <a class="btn" data-size="lg" href="#demo" id="try-live">Try it now (live)<svg class="ls-icon" aria-hidden="true"><use href="#i-arrow-down"/></svg></a>
+            <a class="btn" data-variant="outline" data-size="lg" href="#how">How it works</a>
+          </div>
+          <p class="mk-hero-note">Search algorithms and engineering brought to you by <a href="https://www.linkedin.com/in/aronhomberg/" target="_blank" rel="noopener">Aron Homberg (kyr0)<svg class="ls-icon ls-ext" aria-hidden="true"><use href="#i-external"/></svg><span class="sr-only"> (opens in a new tab)</span></a> · Open Source (<a href="https://github.com/kyr0/defuss-lexicalsearch/blob/main/LICENSE" target="_blank" rel="noopener">MIT<svg class="ls-icon ls-ext" aria-hidden="true"><use href="#i-external"/></svg><span class="sr-only"> (opens in a new tab)</span></a>)</p>
+        </div>
+      </section>
+      <div class="ls-intro" id="intro">
+        <section class="ls-intro-item" aria-labelledby="intro-1">
+          <span class="ls-intro-icon" aria-hidden="true"><svg class="ls-icon"><use href="#i-braces"/></svg></span>
+          <h3 id="intro-1">Exact where it matters</h3>
+          <p>Literal modes compare the original strings: e.g. <code>C++</code> never matches <code>C#</code>, and <code>operator ==</code> never matches <code>operator !=</code>. Exact-first ranking keeps a whole-field match above every partial one, whatever the corpus statistics say.</p>
+        </section>
+        <section class="ls-intro-item" aria-labelledby="intro-2">
+          <span class="ls-intro-icon" aria-hidden="true"><svg class="ls-icon"><use href="#i-layers"/></svg></span>
+          <h3 id="intro-2">Ranked like a search engine</h3>
+          <p><strong>Field-weighted BM25</strong> with an analyzer per field and derived fields, so one symbol can be a raw keyword and a set of code words at once. With exact-first ranking, results come in strict tiers: <code>literal</code>, <code>keyword</code>, <code>identifier-prefix</code>, <code>term</code>, <code>partial</code>, <code>fuzzy</code> and <code>incomplete</code>.</p>
+        </section>
+        <section class="ls-intro-item" aria-labelledby="intro-3">
+          <span class="ls-intro-icon" aria-hidden="true"><svg class="ls-icon"><use href="#i-sparkles"/></svg></span>
+          <h3 id="intro-3">Forgiving input</h3>
+          <p>Prefix completion, suffix and inside-word matching, Levenshtein or transposition-aware typos, completion despite a typo (<code>Kül</code> finds <code>Kühlschrank</code>), quoted phrases, AND and OR, field restrictions and exclusions. Every expansion is exact: no cap silently drops a match.</p>
+        </section>
+        <section class="ls-intro-item" aria-labelledby="intro-4">
+          <span class="ls-intro-icon" aria-hidden="true"><svg class="ls-icon"><use href="#i-package"/></svg></span>
+          <h3 id="intro-4">Small enough to ship</h3>
+          <p>The core is <strong id="intro-size">12&nbsp;kB</strong> of gzipped JavaScript with <strong>zero runtime dependencies</strong>, as ESM and CommonJS with TypeScript types. An index serializes to a JSON snapshot and restores with every structure rebuilt.</p>
+        </section>
+        <section class="ls-intro-item" aria-labelledby="intro-5">
+          <span class="ls-intro-icon" aria-hidden="true"><svg class="ls-icon"><use href="#i-shield"/></svg></span>
+          <h3 id="intro-5">Private by design</h3>
+          <p>Indexing and search run in your browser tab or Node.js process: documents and queries <strong>never leave the device</strong>, and no third party ever sees them. Only <code>fromURL</code> fetches, and only when you call it.</p>
+        </section>
+        <section class="ls-intro-item" aria-labelledby="intro-6">
+          <span class="ls-intro-icon" aria-hidden="true"><svg class="ls-icon"><use href="#i-languages"/></svg></span>
+          <h3 id="intro-6">Many languages, many kinds of text</h3>
+          <p>Unicode words, code identifiers, raw keywords and whitespace symbols, plus <strong>English, German, Spanish and French</strong> stemming, stopwords and phonetic codes, and Japanese word segmentation.</p>
+        </section>
+      </div>
+    </div>
+  </section>
+
+  <div class="ls-flythrough">
+    <section class="parallax" data-sticky style="--parallax-length:2" aria-label="Analyze, index, rank">
+      <div class="parallax-stage" style="background:radial-gradient(circle at 50% 50%, color-mix(in oklch, var(--chart-4) 50%, #05060f), #05060f 72%);color:#fff;border-radius:var(--radius-xl)">
+        <div class="parallax-layer" data-motion="zoom fade" style="--parallax-scale:6"><svg viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><rect x="140" y="140" width="120" height="120" rx="14" fill="none" stroke="#7cf0ff" stroke-width="1.5" opacity=".7"/><rect x="95" y="95" width="210" height="210" rx="22" fill="none" stroke="#b07cff" stroke-width="1" opacity=".5"/><rect x="40" y="40" width="320" height="320" rx="30" fill="none" stroke="#7c8cff" stroke-width=".8" opacity=".35"/></svg></div>
+        <div class="parallax-layer" data-motion="pass" style="animation-range:contain 0% contain 40%;z-index:1"><p class="ls-fly-word">Analyze.</p></div>
+        <div class="parallax-layer" data-motion="pass" style="animation-range:contain 30% contain 70%;z-index:2"><p class="ls-fly-word">Index.</p></div>
+        <div class="parallax-layer" data-motion="pass" style="animation-range:contain 60% contain 100%;z-index:3"><p class="ls-fly-word">Rank.</p></div>
+        <div class="parallax-layer" data-motion="spin" style="--parallax-turn:90deg;--parallax-speed:0%;z-index:-1;opacity:.25"><svg viewBox="0 0 400 400" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g fill="none" stroke="#fff" stroke-width=".6"><path d="M-60 80h520M-60 140h520M-60 200h520M-60 260h520M-60 320h520"/><path d="M80-60v520M200-60v520M320-60v520"/></g></svg></div>
+      </div>
+    </section>
+  </div>
+
+  <section id="demo" class="container ls-section parallax-reveal" data-reveal="zoom" aria-labelledby="demo-title">
+    <header class="mk-section-header" data-align="center">
+      <div class="mk-section-header-copy">
+        <span class="mk-section-header-eyebrow">Live demo</span>
+        <h2 class="mk-section-header-title" id="demo-title">Finding a needle in a haystack</h2>
+        <p class="mk-section-header-desc">The complete defuss-shadcn documentation, <span id="demo-pages">410</span> MDX pages with <span id="demo-text">8.08&nbsp;MB</span> of text, downloaded and indexed right here in your browser. Type and the results follow every keystroke. Open any page with <kbd class="kbd-group"><kbd class="kbd">⌘</kbd><kbd class="kbd">K</kbd></kbd>, or let the demo hide a needle: a word that occurs on exactly one page. In the <button type="button" class="btn ls-inline-link" data-variant="link" data-tab="1">My data (custom)</button> tab you build an index of your own.</p>
+      </div>
+    </header>
+
+    <div class="ls-window frame-window">
+      <div class="card ls-boot" aria-labelledby="boot-title">
+        <div class="card-header">
+          <h3 class="card-title" id="boot-title">Runtime</h3>
+          <p class="card-description" id="boot-status" aria-live="polite">Downloading the documentation corpus...</p>
+        </div>
+        <div class="card-content ls-boot-body">
+          <div class="radial-progress ls-ring" id="ring" role="progressbar" aria-label="Overall loading progress" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="--value:0;--size:7.5rem;--thickness:6px">
+            <span class="radial-progress-value"></span>
+            <span class="radial-progress-caption">corpus</span>
+          </div>
+          <div class="ls-phases">
+            <div class="progress-field">
+              <div class="progress-header">
+                <span class="progress-label" id="p-corpus-label"><svg class="ls-icon" aria-hidden="true"><use href="#i-db"/></svg>Corpus · defuss-shadcn documentation</span>
+                <output class="progress-value" for="p-corpus" data-template="{percent} of 1,368 kB (gzip)"></output>
+              </div>
+              <progress class="progress" id="p-corpus" value="0" max="1367539" aria-labelledby="p-corpus-label"></progress>
+              <span class="progress-hint" id="p-corpus-hint">410 MDX pages, gzipped JSON, unpacked by the browser</span>
+            </div>
+            <div class="progress-field">
+              <div class="progress-header">
+                <span class="progress-label" id="p-index-label"><svg class="ls-icon" aria-hidden="true"><use href="#i-cpu"/></svg>Index · built in a Web Worker</span>
+                <output class="progress-value" for="p-index" data-template="{percent}" data-indeterminate="indexing..."></output>
+              </div>
+              <progress class="progress" id="p-index" value="0" max="100" aria-labelledby="p-index-label"></progress>
+              <span class="progress-hint" id="p-index-hint">four fields per page: path as raw keyword, title, description and body as Unicode words</span>
+            </div>
+          </div>
+          <div class="ls-stats" id="boot-stats">
+            <div class="statistic"><p class="statistic-title">Pages</p><p class="statistic-value" data-stat="pages"></p><p class="statistic-description" data-stat="tokens">indexed documents</p></div>
+            <div class="statistic"><p class="statistic-title">Vocabulary</p><p class="statistic-value" data-stat="terms"></p><p class="statistic-description">distinct terms</p></div>
+            <div class="statistic"><p class="statistic-title">Indexed in</p><p class="statistic-value" data-stat="indexed"></p><p class="statistic-description" data-stat="download">download, unpack, index</p></div>
+            <div class="statistic"><p class="statistic-title">Last query</p><p class="statistic-value" data-stat="query"></p><p class="statistic-description" data-stat="work">postings visited</p></div>
+          </div>
+        </div>
+        <div class="card-footer ls-boot-foot">
+          <div class="alert" data-variant="destructive" id="boot-error" role="alert" hidden>
+            <svg class="alert-icon ls-icon" aria-hidden="true"><use href="#i-alert"/></svg>
+            <div class="alert-content">
+              <h5 class="alert-title" id="boot-error-title">Loading failed</h5>
+              <p class="alert-description" id="boot-error-text"></p>
+            </div>
+            <div class="alert-action"><button type="button" class="btn" data-variant="outline" data-size="sm" id="boot-retry">Retry</button></div>
+          </div>
+          <details class="collapsible" data-variant="ghost" data-size="sm" data-marker="arrow" id="log-panel">
+            <summary class="collapsible-trigger"><span class="collapsible-icon" aria-hidden="true"><svg class="ls-icon"><use href="#i-terminal"/></svg></span>Worker log</summary>
+            <div class="collapsible-content">
+              <div class="mockup-code ls-log" data-size="sm" data-wrap data-title="search-worker.js" id="log" aria-live="off">
+                <pre data-prefix="$" data-cursor><code>starting the search worker</code></pre>
+              </div>
+            </div>
+          </details>
+        </div>
+      </div>
+
+      <div class="tabs ls-tabs">
+        <div class="tab-list" role="tablist" aria-label="Demo" id="demo-tabs" data-size="xl">
+          <button class="tab-trigger ls-tab" role="tab" aria-selected="true" aria-controls="panel-docs" id="tab-docs"><svg class="ls-icon ls-tab-icon" aria-hidden="true"><use href="#i-book"/></svg><span class="ls-tab-text"><span class="ls-tab-title">Documentation</span><span class="ls-tab-desc">410 pages · 8.08 MB of MDX</span></span></button>
+          <button class="tab-trigger ls-tab" role="tab" aria-selected="false" aria-controls="panel-notes" id="tab-notes" tabindex="-1"><svg class="ls-icon ls-tab-icon" aria-hidden="true"><use href="#i-sticky"/></svg><span class="ls-tab-text"><span class="ls-tab-title">My data (custom)</span><span class="ls-tab-desc">Your own index, in-browser</span></span></button>
+        </div>
+        <div class="tab-content" role="tabpanel" id="panel-docs" aria-labelledby="tab-docs" tabindex="0">
+          <div class="ls-query">
+            <search class="mk-search-box ls-search" data-variant="large">
+              <form action="#" method="get" role="search" id="search-form">
+                <div class="search-box" data-size="lg" data-variant="muted" id="search-box">
+                  <svg class="ls-icon" aria-hidden="true"><use href="#i-search"/></svg>
+                  <input type="search" id="q" name="q" placeholder="Search 410 pages: a word, &quot;a phrase&quot;, a symbol..." aria-label="Search the documentation" aria-controls="results" autocomplete="off" spellcheck="false" enterkeyhint="search">
+                  <kbd class="kbd" data-size="sm">⌘K</kbd>
+                  <button type="button" class="search-box-clear" aria-label="Clear search"></button>
+                </div>
+                <button class="btn" type="submit" id="search-submit"><svg class="ls-icon" aria-hidden="true"><use href="#i-search"/></svg>Search</button>
+              </form>
+            </search>
+            <button type="button" class="btn" data-variant="outline" id="needle-button"><svg class="ls-icon" aria-hidden="true"><use href="#i-target"/></svg>Hide a needle</button>
+          </div>
+
+          <div class="ls-controls" id="controls">
+            <div class="ls-control">
+              <span class="ls-control-label" id="mode-label">Match</span>
+              <div class="toggle-group" role="group" aria-labelledby="mode-label" data-type="single" data-variant="outline" data-size="sm" id="mode">
+                <button class="toggle" type="button" aria-pressed="true" data-mode="lexical">Ranked</button>
+                <button class="toggle" type="button" aria-pressed="false" data-mode="exact">Exact</button>
+                <button class="toggle" type="button" aria-pressed="false" data-mode="prefix">Starts with</button>
+                <button class="toggle" type="button" aria-pressed="false" data-mode="suffix">Ends with</button>
+                <button class="toggle" type="button" aria-pressed="false" data-mode="substring">Contains</button>
+              </div>
+            </div>
+            <div class="ls-switches" role="group" aria-label="Search options">
+              <div class="switch-item" data-lexical><input class="switch" data-size="sm" type="checkbox" role="switch" id="opt-prefix" checked><label for="opt-prefix">Completion</label></div>
+              <div class="switch-item" data-lexical><input class="switch" data-size="sm" type="checkbox" role="switch" id="opt-typos" checked><label for="opt-typos">Typos</label></div>
+              <div class="switch-item" data-lexical><input class="switch" data-size="sm" type="checkbox" role="switch" id="opt-substring" checked><label for="opt-substring">Inside words</label></div>
+              <div class="switch-item" data-lexical><input class="switch" data-size="sm" type="checkbox" role="switch" id="opt-all"><label for="opt-all">All words</label></div>
+              <div class="switch-item"><input class="switch" data-size="sm" type="checkbox" role="switch" id="opt-exact-first" checked><label for="opt-exact-first">Exact first</label></div>
+              <div class="switch-item" data-literal><input class="switch" data-size="sm" type="checkbox" role="switch" id="opt-case" checked disabled><label for="opt-case">Match case</label></div>
+            </div>
+            <div class="ls-selects">
+              <label class="sr-only" for="opt-field">Field</label>
+              <select class="select" data-size="sm" id="opt-field">
+                <option value="all" selected>All fields</option>
+                <option value="title">Title</option>
+                <option value="description">Description</option>
+                <option value="body">Body</option>
+                <option value="path">Path</option>
+              </select>
+              <label class="sr-only" for="opt-section">Section</label>
+              <select class="select" data-size="sm" id="opt-section"><option value="all" selected>All sections</option></select>
+            </div>
+          </div>
+
+          <div class="mk-search-summary" role="status" id="summary" hidden>
+            <p><strong class="ls-summary-count"></strong> for <q class="ls-summary-query"></q> <span class="badge ls-summary-note" data-variant="secondary" hidden></span></p>
+            <span class="mk-search-summary-time"></span>
+            <a class="mk-search-summary-clear" href="#demo">Clear search</a>
+          </div>
+
+          <section class="mk-empty-state ls-cta" aria-labelledby="empty-title" id="empty">
+            <span class="mk-empty-state-icon" aria-hidden="true"><svg class="ls-icon"><use href="#i-search"/></svg></span>
+            <h2 class="mk-empty-state-title" id="empty-title">Search 410 documentation pages as you type</h2>
+            <p class="mk-empty-state-text">Try one of these, each showing a different kind of match, or let the demo hide a needle and find it again.</p>
+            <div class="mk-empty-state-actions ls-examples" id="examples">
+              <button type="button" class="btn" data-variant="outline" data-size="sm" data-example="term">dialog</button>
+              <button type="button" class="btn" data-variant="outline" data-size="sm" data-example="phrase">"dark mode"</button>
+              <button type="button" class="btn" data-variant="outline" data-size="sm" data-example="typo">dialgo</button>
+              <button type="button" class="btn" data-variant="outline" data-size="sm" data-example="completion">scaff</button>
+              <button type="button" class="btn" data-variant="outline" data-size="sm" data-example="literal">aria-label</button>
+              <button type="button" class="btn" data-variant="outline" data-size="sm" data-example="path">pages/overlays/command.mdx</button>
+            </div>
+            <div class="mk-empty-state-actions">
+              <button type="button" class="btn" data-size="lg" data-needle><svg class="ls-icon" aria-hidden="true"><use href="#i-target"/></svg>Hide a needle and find it</button>
+            </div>
+          </section>
+
+          <ol class="ls-results grid grid-cols-auto gap-4" id="results" aria-label="Search results, best match first" data-df-stagger style="--df-motion-stagger-step:45ms;--df-motion-duration:520ms"></ol>
+        </div>
+
+        <div class="tab-content" role="tabpanel" id="panel-notes" aria-labelledby="tab-notes" tabindex="0" hidden>
+          <div class="ls-notes-layout">
+            <section class="ls-board" aria-labelledby="notes-title">
+              <header class="ls-board-head">
+                <h3 class="ls-way-title" id="notes-title"><svg class="ls-icon" aria-hidden="true"><use href="#i-sticky"/></svg>Your notes</h3>
+                <span class="badge" data-variant="outline" id="notes-count">0 notes indexed</span>
+              </header>
+              <div class="ls-board-actions">
+                <label class="sr-only" for="notes-analyzer">Analyzer</label>
+                <select class="select" data-size="sm" id="notes-analyzer">
+                  <option value="unicode" selected>Unicode words (default)</option>
+                  <option value="en">English · stemming, stopwords</option>
+                  <option value="de">German · stemming, stopwords</option>
+                  <option value="es">Spanish · stemming, stopwords</option>
+                  <option value="fr">French · stemming, stopwords</option>
+                  <option value="ja">Japanese · word segmentation</option>
+                  <option value="code">Code identifiers · camelCase, snake_case</option>
+                </select>
+                <button type="button" class="btn" data-size="sm" id="add-note"><svg class="ls-icon" aria-hidden="true"><use href="#i-plus"/></svg>Add note</button>
+                <button type="button" class="btn" data-variant="outline" data-size="sm" id="add-samples"><svg class="ls-icon" aria-hidden="true"><use href="#i-shuffle"/></svg>Add sample notes</button>
+              </div>
+              <p class="ls-way-desc" id="notes-desc">Write anything. Each keystroke updates the note in the index (upsert); an emptied note leaves it. Switching the analyzer rebuilds the index from your notes.</p>
+              <div class="ls-notes-scroll">
+                <div class="ls-notes" id="notes"></div>
+                <section class="mk-empty-state" data-variant="dashed" aria-labelledby="notes-empty-title" id="notes-empty">
+                  <span class="mk-empty-state-icon" aria-hidden="true"><svg class="ls-icon"><use href="#i-sticky"/></svg></span>
+                  <h2 class="mk-empty-state-title" id="notes-empty-title">No notes yet</h2>
+                  <p class="mk-empty-state-text">Add a note, or add the samples: they show stemming, compound words and code identifiers.</p>
+                </section>
+              </div>
+            </section>
+            <div class="ls-notes-search" id="notes-search">
+              <div class="ls-query">
+                <search class="mk-search-box ls-search" data-variant="large">
+                  <form action="#" method="get" role="search">
+                    <div class="search-box" data-size="lg" data-variant="muted" id="notes-box">
+                      <svg class="ls-icon" aria-hidden="true"><use href="#i-search"/></svg>
+                      <input type="search" id="notes-q" name="q" placeholder="Search your notes..." aria-label="Search your notes" aria-controls="notes-results" autocomplete="off" spellcheck="false" enterkeyhint="search">
+                      <button type="button" class="search-box-clear" aria-label="Clear search"></button>
+                    </div>
+                    <button class="btn" type="submit"><svg class="ls-icon" aria-hidden="true"><use href="#i-search"/></svg>Search</button>
+                  </form>
+                </search>
+              </div>
+              <div class="mk-search-summary" role="status" id="notes-summary" hidden>
+                <p><strong class="ls-summary-count"></strong> for <q class="ls-summary-query"></q> <span class="badge ls-summary-note" data-variant="secondary" hidden></span></p>
+                <span class="mk-search-summary-time"></span>
+                <a class="mk-search-summary-clear" href="#demo">Clear search</a>
+              </div>
+              <section class="mk-empty-state ls-cta" aria-labelledby="notes-cta-title" id="notes-cta">
+                <span class="mk-empty-state-icon" aria-hidden="true"><svg class="ls-icon"><use href="#i-search"/></svg></span>
+                <h2 class="mk-empty-state-title" id="notes-cta-title">Search what you wrote</h2>
+                <p class="mk-empty-state-text">Notes are searched with completion, inside-word matching and typo tolerance: <q>Kül</q> and <q>ühl</q> find <q>Kühlschrank</q>, <q>http</q> finds <q>XMLHttpRequest</q>. With the German analyzer, <q>haus</q> finds <q>Häuser</q>.</p>
+              </section>
+              <ol class="ls-results grid grid-cols-auto gap-4" id="notes-results" aria-label="Your notes, best match first" data-df-stagger style="--layout-min:14rem;--df-motion-stagger-step:45ms;--df-motion-duration:520ms"></ol>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="how" class="container ls-section parallax-reveal" aria-labelledby="how-title">
+    <section class="mk-features" style="width:100%">
+      <div class="mk-features-head">
+        <span class="mk-features-eyebrow">How it works</span>
+        <h2 class="mk-features-title" id="how-title">Analyze once, then match and rank every query</h2>
+        <p class="mk-features-desc">Each field runs its own analyzer into postings with word positions and a vocabulary trie. A query is parsed into words and quoted phrases, analyzed the same way, expanded where you asked for it, and ranked by BM25; with exact-first ranking, the tier decides first.</p>
+      </div>
+      <figure class="diagram ls-pipeline" id="pipeline" data-type="data-flow" data-steps data-autoplay="400" aria-label="How a document is indexed and a query is answered">
+        <div class="diagram-canvas" style="grid-template-columns:6.5rem repeat(4,minmax(9rem,1fr));--diagram-node-w:11rem">
+          <div class="diagram-group" data-shape="lane" data-step="0" style="--col:1;--row:2;--span:5"><span class="diagram-group-label">Index · browser or Node.js</span></div>
+          <div class="diagram-group" data-shape="lane" data-step="0" style="--col:1;--row:3;--span:5"><span class="diagram-group-label">Search · browser or Node.js</span></div>
+          <div class="diagram-cell" data-role="head" data-step="0" style="--col:2;--row:1">01 · Text</div>
+          <div class="diagram-cell" data-role="head" data-step="0" style="--col:3;--row:1">02 · Analyze</div>
+          <div class="diagram-cell" data-role="head" data-step="0" style="--col:4;--row:1">03 · Structures</div>
+          <div class="diagram-cell" data-role="head" data-step="0" style="--col:5;--row:1">04 · Result</div>
+          <div class="diagram-node" data-node="documents" data-step="1" data-step-label="Index: the documents" style="--col:2;--row:2">
+            <span class="diagram-node-eyebrow">Documents</span>
+            <span class="diagram-node-name">Fields per document</span>
+            <span class="diagram-node-meta">stable IDs · JSON metadata</span>
+          </div>
+          <div class="diagram-node" data-node="analyze" data-step="2" data-step-label="Index: analyze each field" style="--col:3;--row:2">
+            <span class="diagram-node-eyebrow">Analyzer per field</span>
+            <span class="diagram-node-name">Tokenize, normalize, stem</span>
+            <span class="diagram-node-meta">keyword · Unicode · code · language</span>
+          </div>
+          <div class="diagram-node" data-node="postings" data-step="3" data-step-label="Index: postings and tries" style="--col:4;--row:2">
+            <span class="diagram-node-eyebrow">Per field</span>
+            <span class="diagram-node-name">Postings and trie</span>
+            <span class="diagram-node-meta">positions · BM25 statistics</span>
+          </div>
+          <div class="diagram-node" data-node="snapshot" data-shape="store" data-step="4" data-step-label="Index: memory or snapshot" style="--col:5;--row:2">
+            <span class="diagram-node-name">Index</span>
+            <span class="diagram-node-meta">memory · JSON snapshot</span>
+          </div>
+          <div class="diagram-node" data-node="query" data-shape="pill" data-step="5" data-step-label="Search: your query" style="--col:2;--row:3">
+            <span class="diagram-node-name">Query</span>
+            <span class="diagram-node-meta">words · "phrases" · symbols</span>
+          </div>
+          <div class="diagram-node" data-node="expand" data-tone="accent" data-step="6" data-step-label="Search: parse and expand" style="--col:3;--row:3">
+            <span class="diagram-node-eyebrow">Same analyzers</span>
+            <span class="diagram-node-name">Parse and expand</span>
+            <span class="diagram-node-meta">completion · typos · inside words</span>
+          </div>
+          <div class="diagram-node" data-node="match" data-step="7" data-step-label="Search: match and score" style="--col:4;--row:3">
+            <span class="diagram-node-eyebrow">Cheapest clause first</span>
+            <span class="diagram-node-name">Match and score</span>
+            <span class="diagram-node-meta">phrases by position · BM25</span>
+          </div>
+          <div class="diagram-node" data-node="results" data-shape="pill" data-step="8" data-step-label="Search: ranked results" style="--col:5;--row:3">
+            <span class="diagram-node-name">Top k, ranked</span>
+            <span class="diagram-node-meta">tier, then score, then ID</span>
+          </div>
+        </div>
+        <ol class="diagram-edges">
+          <li class="diagram-edge" data-from="documents" data-to="analyze">text</li>
+          <li class="diagram-edge" data-from="analyze" data-to="postings">terms</li>
+          <li class="diagram-edge" data-from="postings" data-to="snapshot">structures</li>
+          <li class="diagram-edge" data-from="snapshot" data-to="match" data-line="dashed">lookups</li>
+          <li class="diagram-edge" data-from="query" data-to="expand" data-flow="2400" data-flow-delay="0">text</li>
+          <li class="diagram-edge" data-from="expand" data-to="match" data-tone="accent" data-flow="2400" data-flow-delay="700">terms</li>
+          <li class="diagram-edge" data-from="match" data-to="results" data-flow="2400" data-flow-delay="1400">top k</li>
+        </ol>
+      </figure>
+      <div class="ls-tiers">
+        <h3 class="ls-way-title">Exact-first tiers, strongest first</h3>
+        <p class="ls-way-desc">With exact-first ranking, the weakest clause of a result decides its tier. A literal match always outranks a keyword match, however rare the words of the other result are; BM25 orders results within one tier.</p>
+        <ol class="ls-tier-list">
+          <li><span class="badge" data-variant="default" data-size="sm">literal</span> the whole original field equals the query, whitespace included</li>
+          <li><span class="badge" data-variant="default" data-size="sm">keyword</span> an exact analyzed keyword, such as a case-folded identifier</li>
+          <li><span class="badge" data-variant="secondary" data-size="sm">identifier-prefix</span> a keyword starts or ends with the query</li>
+          <li><span class="badge" data-variant="secondary" data-size="sm">term</span> the analyzed words of the query occur exactly</li>
+          <li><span class="badge" data-variant="outline" data-size="sm">partial</span> a word starts with, ends with or contains the query</li>
+          <li><span class="badge" data-variant="outline" data-size="sm">fuzzy</span> a word lies within the edit distance, or starts within it while you type</li>
+          <li><span class="badge" data-variant="outline" data-size="sm">incomplete</span> under OR, at least one query word is missing</li>
+        </ol>
+      </div>
+    </section>
+  </section>
+
+  <section id="bench" class="container ls-section parallax-reveal" aria-labelledby="bench-title">
+    <section class="mk-stats" style="width:100%">
+      <div class="mk-stats-layout">
+        <div class="mk-stats-copy">
+          <div class="mk-stats-head">
+            <h2 class="mk-stats-title" id="bench-title">Measured on your device, just now</h2>
+            <p class="mk-stats-desc">Your browser downloaded, unpacked and indexed the documentation above. The search worker then timed seven typical queries: after three warm-up runs, the median of 21 samples, each a batch of searches lasting about 2&nbsp;ms, since browsers round timers to 0.1&nbsp;ms. These figures come from this page load; for Node.js, <code>make bench</code> writes the same kind of report.</p>
+          </div>
+          <div class="mk-stats-grid">
+            <div class="mk-stat"><span class="mk-stat-value" data-bench="download"></span><span class="mk-stat-label">to download the 1,368&nbsp;kB corpus</span></div>
+            <div class="mk-stat"><span class="mk-stat-value" data-bench="index"></span><span class="mk-stat-label">to index 410 pages in a Web Worker</span></div>
+            <div class="mk-stat"><span class="mk-stat-value" data-bench="rare"></span><span class="mk-stat-label">median search for a rare word</span></div>
+            <div class="mk-stat"><span class="mk-stat-value" data-bench="typo"></span><span class="mk-stat-label">median search with typo tolerance</span></div>
+          </div>
+        </div>
+        <figure class="mk-stats-media card ls-bench">
+          <figcaption class="card-header"><h3 class="card-title">Median latency per query type</h3><p class="card-description">Top 12 of 410 pages. The first run of an inside-word search also builds its trigram index once.</p></figcaption>
+          <div class="card-content">
+            <table class="table ls-bench-table" data-size="sm">
+              <thead><tr><th scope="col">Query type</th><th scope="col">Query</th><th scope="col" class="ls-num">Median</th><th scope="col" class="ls-num">First run</th><th scope="col" class="ls-num">Results</th></tr></thead>
+              <tbody id="bench-rows"><tr><td colspan="5" class="ls-bench-wait">Runs once the index is ready...</td></tr></tbody>
+            </table>
+          </div>
+        </figure>
+      </div>
+    </section>
+  </section>
+
+  <div class="container ls-section parallax-reveal" id="consulting">
+    <div class="corner-leaf-reverse pattern-mesh ls-consult">
+    <section class="mk-cta" data-variant="split" aria-labelledby="consult-title">
+      <div class="mk-cta-inner">
+        <div class="mk-cta-copy">
+          <div class="ls-cta-head">
+            <div class="aura aura-glow aura-gold ls-cta-portrait" style="--shape-round:1.25rem"><img class="shape-squircle" src="assets/aron-homberg.jpg" width="400" height="400" alt="Portrait of Aron Homberg" loading="lazy"></div>
+            <h2 class="mk-cta-title" id="consult-title">Need search tuned to your data?</h2>
+          </div>
+          <p class="mk-cta-desc">Aron Homberg, freelance and independent AI researcher: search and retrieval, embedding models and on-device AI, offers consulting services worldwide.</p>
+        </div>
+        <div class="mk-cta-actions">
+          <a class="btn" data-size="lg" href="https://www.linkedin.com/in/aronhomberg/" target="_blank" rel="noopener"><svg class="ls-icon ls-icon-fill" aria-hidden="true"><use href="#i-linkedin"/></svg>Talk to Aron on LinkedIn<svg class="ls-icon ls-ext" aria-hidden="true"><use href="#i-external"/></svg><span class="sr-only"> (opens in a new tab)</span></a>
+        </div>
+      </div>
+    </section>
+    </div>
+  </div>
+
+  <section id="use" class="container ls-section parallax-reveal" aria-labelledby="use-title">
+    <div class="corner-leaf pattern-dots ls-use">
+    <header class="mk-section-header">
+      <div class="mk-section-header-copy">
+        <span class="mk-section-header-eyebrow">Use it</span>
+        <h2 class="mk-section-header-title" id="use-title">Add it to your own app</h2>
+        <p class="mk-section-header-desc">Write the five lines yourself, or hand one prompt to your coding agent.</p>
+      </div>
+    </header>
+    <div class="ls-ways">
+      <div class="ls-way">
+        <h3 class="ls-way-title"><svg class="ls-icon" aria-hidden="true"><use href="#i-package"/></svg>Package</h3>
+        <p class="ls-way-desc">Install it from npm with <code>npm install defuss-lexicalsearch</code>, or <code>bun add defuss-lexicalsearch</code>. Then, in Node.js or the browser:</p>
+        <figure class="mk-code-block" data-variant="file">
+          <div class="mk-code-block-head"><span class="mk-code-block-file"><svg class="ls-icon" aria-hidden="true"><use href="#i-file"/></svg>search.js</span><button class="mk-code-block-copy" type="button" aria-label="Copy code"><svg class="ls-icon" aria-hidden="true"><use href="#i-copy"/></svg></button></div>
+          <pre data-numbers><code id="usage-code"><span><span class="mk-code-block-k">import</span> { LexicalSearch } <span class="mk-code-block-k">from</span> <span class="mk-code-block-s">"defuss-lexicalsearch"</span>;</span><span></span><span><span class="mk-code-block-k">const</span> index = <span class="mk-code-block-k">new</span> LexicalSearch({ fields: { title: { weight: <span class="mk-code-block-n">3</span> }, body: {} } });</span><span>index.addAll([{ id: <span class="mk-code-block-s">"dialog"</span>, fields: { title: <span class="mk-code-block-s">"Dialog"</span>, body: <span class="mk-code-block-s">"A modal window for focused tasks."</span> } }]);</span><span></span><span><span class="mk-code-block-k">const</span> hits = index.search(<span class="mk-code-block-s">"dialgo"</span>, { fuzzy: <span class="mk-code-block-k">true</span>, transpositions: <span class="mk-code-block-k">true</span> });</span><span>console.log(hits[<span class="mk-code-block-n">0</span>].id); <span class="mk-code-block-c">// "dialog", despite the typo</span></span></code></pre>
+          <span class="mk-code-block-status" role="status"></span>
+        </figure>
+      </div>
+      <div class="separator ls-sep-vertical" data-orientation="vertical" role="separator"></div>
+      <hr class="separator ls-sep-horizontal">
+      <div class="ls-way">
+        <h3 class="ls-way-title"><svg class="ls-icon" aria-hidden="true"><use href="#i-bot"/></svg>Vibe coding</h3>
+        <p class="ls-way-desc">Paste this prompt into your coding agent. It links the repository, so the agent works from the current README.</p>
+        <div class="ls-prompt">
+          <div class="mockup-code" data-chrome="mac" data-title="coding agent · ~/your-app" data-wrap id="agent-prompt">
+          <pre data-prefix=">"><code>Integrate defuss-lexicalsearch into this app: https://github.com/kyr0/defuss-lexicalsearch</code></pre>
+          <pre data-prefix=""><code>Install the npm package defuss-lexicalsearch and read its README first. Index documents with new LexicalSearch({ fields }) and addAll(), then search with search(query, options): { prefix: true, substring: true, fuzzy: true, transpositions: true } for a search box, mode: "exact" for identifiers.</code></pre>
+          <pre data-prefix=""><code>For code symbols, start from apiSearchPreset, which keeps programming languages apart; for German, English, Spanish or French text, import the language analyzer.</code></pre>
+          <pre data-prefix=""><code>Index large collections in a Web Worker, and persist them with serialize() and LexicalSearch.fromJSON().</code></pre>
+            <pre data-prefix="" data-tone="muted" data-cursor><code>send</code></pre>
+          </div>
+          <button type="button" class="btn ls-prompt-copy" data-variant="secondary" data-size="sm" id="copy-prompt"><svg class="ls-icon" aria-hidden="true"><use href="#i-copy"/></svg><span>Copy prompt</span></button>
+          <span class="sr-only" role="status" id="copy-prompt-status"></span>
+        </div>
+      </div>
+    </div>
+    </div>
+  </section>
+
+  <div class="container ls-section parallax-reveal" data-reveal="zoom">
+    <section class="mk-cta" data-variant="dark" aria-labelledby="cta-title">
+      <div class="mk-cta-inner">
+        <div class="mk-cta-copy">
+          <h2 class="mk-cta-title" id="cta-title">Exact and ranked search anywhere, for free</h2>
+          <p class="mk-cta-desc">BM25 ranking, literal symbol matching, phrases and typo tolerance run wherever JavaScript runs: no search server, no hosted index, no per-query bill.</p>
+        </div>
+        <div class="mk-cta-actions">
+          <a class="btn" data-size="lg" href="https://github.com/kyr0/defuss-lexicalsearch" target="_blank" rel="noopener">View on GitHub<svg class="ls-icon ls-ext" aria-hidden="true"><use href="#i-external"/></svg><span class="sr-only"> (opens in a new tab)</span></a>
+          <a class="btn" data-variant="outline" data-size="lg" href="https://github.com/kyr0/defuss-lexicalsearch/blob/main/ARCH.md" target="_blank" rel="noopener">Read the architecture<svg class="ls-icon ls-ext" aria-hidden="true"><use href="#i-external"/></svg><span class="sr-only"> (opens in a new tab)</span></a>
+        </div>
+        <p class="mk-cta-note">MIT licensed · demo corpus credited below</p>
+      </div>
+    </section>
+  </div>
+
+  </main>
+
+  <footer class="mk-footer" style="width:100%">
+    <div class="mk-footer-inner">
+      <nav class="mk-footer-nav ls-footer-nav" aria-label="Footer">
+        <div class="mk-footer-col">
+          <h3 class="mk-footer-heading">Project</h3>
+          <ul class="mk-footer-list">
+            <li><a href="https://github.com/kyr0/defuss-lexicalsearch" target="_blank" rel="noopener">Source code<svg class="ls-icon ls-ext" aria-hidden="true"><use href="#i-external"/></svg><span class="sr-only"> (opens in a new tab)</span></a></li>
+            <li><a href="https://www.npmjs.com/package/defuss-lexicalsearch" target="_blank" rel="noopener">npm package<svg class="ls-icon ls-ext" aria-hidden="true"><use href="#i-external"/></svg><span class="sr-only"> (opens in a new tab)</span></a></li>
+            <li><a href="https://github.com/kyr0/defuss-lexicalsearch/blob/main/ARCH.md" target="_blank" rel="noopener">Architecture<svg class="ls-icon ls-ext" aria-hidden="true"><use href="#i-external"/></svg><span class="sr-only"> (opens in a new tab)</span></a></li>
+            <li><a href="https://github.com/kyr0/defuss-lexicalsearch/blob/main/CHANGELOG.md" target="_blank" rel="noopener">Changelog<svg class="ls-icon ls-ext" aria-hidden="true"><use href="#i-external"/></svg><span class="sr-only"> (opens in a new tab)</span></a></li>
+          </ul>
+        </div>
+        <div class="mk-footer-col">
+          <h3 class="mk-footer-heading">Demo data</h3>
+          <ul class="mk-footer-list">
+            <li><a href="https://github.com/kyr0/defuss-shadcn/tree/896cf2ac69c53317e669604f2c28d524d947c10a/src/documentation" target="_blank" rel="noopener" id="corpus-source">defuss-shadcn documentation<svg class="ls-icon ls-ext" aria-hidden="true"><use href="#i-external"/></svg><span class="sr-only"> (opens in a new tab)</span></a></li>
+            <li><a href="https://github.com/kyr0/defuss-shadcn/blob/896cf2ac69c53317e669604f2c28d524d947c10a/LICENSE" target="_blank" rel="noopener">Its license <span class="badge" data-variant="outline">MIT</span><svg class="ls-icon ls-ext" aria-hidden="true"><use href="#i-external"/></svg><span class="sr-only"> (opens in a new tab)</span></a></li>
+          </ul>
+        </div>
+        <div class="mk-footer-col">
+          <h3 class="mk-footer-heading">Built with</h3>
+          <ul class="mk-footer-list">
+            <li><a href="https://github.com/kyr0/defuss-shadcn" target="_blank" rel="noopener">defuss-shadcn<svg class="ls-icon ls-ext" aria-hidden="true"><use href="#i-external"/></svg><span class="sr-only"> (opens in a new tab)</span></a></li>
+            <li><a href="https://github.com/kyr0/defuss-vectorsearch" target="_blank" rel="noopener">defuss-vectorsearch, its semantic sibling<svg class="ls-icon ls-ext" aria-hidden="true"><use href="#i-external"/></svg><span class="sr-only"> (opens in a new tab)</span></a></li>
+          </ul>
+        </div>
+        <div class="mk-footer-col">
+          <h3 class="mk-footer-heading">Professional consulting services</h3>
+          <aside class="corner-leaf ls-ad" aria-label="Consulting by Aron Homberg">
+            <div class="ls-ad-head">
+              <div class="aura aura-glow aura-gold ls-ad-portrait" style="--shape-round:1.5rem"><img class="shape-squircle" src="assets/aron-homberg.jpg" width="400" height="400" alt="Portrait of Aron Homberg" loading="lazy"></div>
+              <div>
+                <p class="ls-ad-name">Aron Homberg</p>
+                <p class="ls-ad-role">Freelance expert · independent AI researcher</p>
+              </div>
+            </div>
+            <a class="btn" data-size="sm" href="https://www.linkedin.com/in/aronhomberg/" target="_blank" rel="noopener"><svg class="ls-icon ls-icon-fill" aria-hidden="true"><use href="#i-linkedin"/></svg>Connect on LinkedIn<svg class="ls-icon ls-ext" aria-hidden="true"><use href="#i-external"/></svg><span class="sr-only"> (opens in a new tab)</span></a>
+          </aside>
+        </div>
+      </nav>
+      <hr class="separator mk-footer-rule">
+      <div class="mk-footer-bottom">
+        <a href="#top" class="mk-footer-brand" aria-label="Back to the top"><svg class="ls-icon" aria-hidden="true"><use href="#i-logo"/></svg><span class="mk-footer-brand-name">defuss-lexicalsearch</span></a>
+        <div class="mk-footer-meta">
+          <p class="mk-footer-copy">© 2026 <a href="https://www.linkedin.com/in/aronhomberg/" target="_blank" rel="noopener">Aron Homberg (kyr0)<svg class="ls-icon ls-ext" aria-hidden="true"><use href="#i-external"/></svg><span class="sr-only"> (opens in a new tab)</span></a> · MIT. Demo corpus: defuss-shadcn documentation, © 2026 Aron Homberg and Cody Lindley, MIT.</p>
+        </div>
+      </div>
+    </div>
+  </footer>
+</div>
+<div class="fab" data-scroll-top>
+  <a class="btn fab-trigger" href="#top" aria-label="Back to top"><span class="fab-icon" aria-hidden="true"><svg class="ls-icon"><use href="#i-arrow-up"/></svg></span></a>
+</div>
+
+<dialog id="cmd" class="command" role="dialog" aria-modal="true" aria-label="Documentation pages">
+  <div class="command-content">
+    <div class="command-input-wrapper">
+      <svg class="ls-icon" aria-hidden="true"><use href="#i-search"/></svg>
+      <input class="command-input" type="text" placeholder="Filter 410 pages, or type a query and press Enter..." autocomplete="off" autocorrect="off" spellcheck="false">
+    </div>
+    <div class="command-list" id="cmd-list">
+      <div class="command-group" id="cmd-placeholder">
+        <p class="command-group-heading">Documentation pages</p>
+        <button class="command-item" aria-disabled="true">Loading 410 pages...</button>
+      </div>
+    </div>
+    <div class="command-empty" hidden>No page title matches. Press Enter to search for your text.</div>
+  </div>
+</dialog>
+
+<script type="module" src="https://cdn.jsdelivr.net/gh/kyr0/defuss-shadcn@0.9.11/dist/components/all.min.js" integrity="sha384-smU3aE2UPGvVE+nQS/ekmmE86ccjq2yap/zPMBoITba6SOq71Fil6vo4HZHaFZRY" crossorigin="anonymous"></script>
+<script type="module" src="assets/demo.js"></script>
+</body>
+</html>

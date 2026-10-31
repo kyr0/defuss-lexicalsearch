@@ -1,0 +1,119 @@
+{
+  "name": "defuss-lexicalsearch",
+  "version": "0.2.0",
+  "description": "Local lexical search with BM25, literal symbols, per-field analyzers, exact-first ranking and fuzzy/partial retrieval.",
+  "type": "module",
+  "license": "MIT",
+  "author": "Aron Homberg",
+  "sideEffects": false,
+  "packageManager": "bun@1.4.3",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./en": {
+      "import": {
+        "types": "./dist/en.d.ts",
+        "default": "./dist/en.js"
+      },
+      "require": {
+        "types": "./dist/en.d.cts",
+        "default": "./dist/en.cjs"
+      }
+    },
+    "./de": {
+      "import": {
+        "types": "./dist/de.d.ts",
+        "default": "./dist/de.js"
+      },
+      "require": {
+        "types": "./dist/de.d.cts",
+        "default": "./dist/de.cjs"
+      }
+    },
+    "./es": {
+      "import": {
+        "types": "./dist/es.d.ts",
+        "default": "./dist/es.js"
+      },
+      "require": {
+        "types": "./dist/es.d.cts",
+        "default": "./dist/es.cjs"
+      }
+    },
+    "./fr": {
+      "import": {
+        "types": "./dist/fr.d.ts",
+        "default": "./dist/fr.js"
+      },
+      "require": {
+        "types": "./dist/fr.d.cts",
+        "default": "./dist/fr.cjs"
+      }
+    },
+    "./ja": {
+      "import": {
+        "types": "./dist/ja.d.ts",
+        "default": "./dist/ja.js"
+      },
+      "require": {
+        "types": "./dist/ja.d.cts",
+        "default": "./dist/ja.cjs"
+      }
+    },
+    "./phonetic": {
+      "import": {
+        "types": "./dist/phonetic/index.d.ts",
+        "default": "./dist/phonetic/index.js"
+      },
+      "require": {
+        "types": "./dist/phonetic/index.d.cts",
+        "default": "./dist/phonetic/index.cjs"
+      }
+    },
+    "./stem": {
+      "import": {
+        "types": "./dist/stem/index.d.ts",
+        "default": "./dist/stem/index.js"
+      },
+      "require": {
+        "types": "./dist/stem/index.d.cts",
+        "default": "./dist/stem/index.cjs"
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=26"
+  },
+  "scripts": {
+    "build": "pkgroll --clean-dist",
+    "lint": "oxlint --deny-warnings && tsc --noEmit",
+    "test": "pkgroll --clean-dist && node --test test/*.test.mjs && bun test ./test/*.test.mjs && tsc -p test/tsconfig.json",
+    "e2e": "node scripts/e2e.mjs",
+    "bench": "node bench/benchmark.mjs",
+    "bench:api": "node bench/api-benchmark.mjs",
+    "demo": "node scripts/server.mjs",
+    "prepack": "tsc --noEmit && pkgroll --clean-dist"
+  },
+  "devDependencies": {
+    "oxlint": "1.90.0",
+    "pkgroll": "2.29.0",
+    "playwright": "1.63.0",
+    "typescript": "~5.9.3"
+  }
+}

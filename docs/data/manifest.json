@@ -1,0 +1,15 @@
+{
+  "version": "0.2.0",
+  "library": {
+    "files": 16,
+    "coreBytes": 43811,
+    "coreGzipBytes": 11718
+  },
+  "corpus": {
+    "file": "defuss-shadcn-docs.json.gz",
+    "source": "https://github.com/kyr0/defuss-shadcn/tree/896cf2ac69c53317e669604f2c28d524d947c10a/src/documentation",
+    "pages": 410,
+    "bytes": 1367539,
+    "textBytes": 8077304
+  }
+}

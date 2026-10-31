@@ -1,0 +1,10 @@
+import search = require('defuss-lexicalsearch');
+import language = require('defuss-lexicalsearch/de');
+const index = new search.LexicalSearch({ analyzer: language.de });
+index.add({ id: 'a', fields: { text: 'Haus' } });
+const hits: search.SearchResult[] = index.search('haus');
+void hits;
+const api = new search.LexicalSearch(search.apiSearchPreset);
+api.add({id:'a',fields:{symbol:'C++',description:'language'}});
+const literal: search.SearchResult[] = api.search('C++',{mode:'exact',fields:['symbol']});
+void literal;
