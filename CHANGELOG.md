@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.0 (2026-10-31)
+
+- Added: analyzers for 15 more languages, 20 in all. Snowball 3.1.1 stemmers for Russian, Polish, Indonesian, Portuguese, Italian, Dutch, Turkish, Arabic and Hindi (`defuss-lexicalsearch/ru` and so on, and `stem_ru` to `stem_tr` from `/stem`), with Snowball stopwords for Russian, Italian, Portuguese and Dutch; word segmentation for Chinese and Thai; syllable bigrams for Korean; words plus trigrams for Bangla and Urdu; tone mark folding for Vietnamese. Each generated stemmer reproduces Snowball's reference output for its whole test vocabulary.
+- Added: `ru` drops stress marks, so `приве́т` finds `привет`; `tr` lowercases with Turkish rules and drops suffixes after an apostrophe; `ur` folds Arabic kaf and yeh to their Urdu forms. The new analyzers keep words with soft hyphens or zero-width (non-)joiners whole.
+- Added: the analyzer option `segmented`. Under `operator: 'any'`, one word of an unspaced query fragment now suffices for `ja`, `zh`, `th`, `ko`, `bn` and `ur`; before, every segmented word of the fragment had to occur, so a Japanese question matched almost nothing. `operator: 'all'` and phrases still require all words. `ja` keeps the id `ja-intl-word-v1`, because its tokens are unchanged.
+- Added: `bench/recall.mjs`, run by `make bench` and `make docs`, measures R@1, R@5 and R@10 per language on tiny-embedding-bench-v1 for four search strategies. With the question's language known, mean R@5 over 20 languages is 97.3%, against 74.9% with the default analyzer.
+- Added: the website section "Measured, not promised" shows R@5 per language in one tab per strategy, rendered from `docs/data/recall.json`; the notes demo offers all 20 language analyzers.
+
 ## 0.2.0 (2026-10-31)
 
 First release on npm. Adds `LexicalSearch` with field-weighted BM25, per-field analyzers, derived fields, raw/folded keyword and whitespace analyzers, optional accent folding, literal equality/prefix/suffix/substring, configurable exact-first tiers, token suffix/substring retrieval, optional OSA transpositions, query exclusions, escaped query syntax, and bounded remote loading. Includes the API-search preset, browser/API/Worker examples and independent oracle/regression tests.

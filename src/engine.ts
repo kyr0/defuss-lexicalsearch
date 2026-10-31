@@ -61,6 +61,7 @@ export class LexicalSearch<M extends JsonValue = Record<string, JsonValue>> {
       const previousAnalyzer = analyzerIds.get(analyzer.id);
       if (previousAnalyzer && (previousAnalyzer.tokenize !== analyzer.tokenize || previousAnalyzer.normalize !== analyzer.normalize ||
         previousAnalyzer.stem !== analyzer.stem || previousAnalyzer.phonetic !== analyzer.phonetic || previousAnalyzer.kind !== analyzer.kind ||
+        previousAnalyzer.segmented !== analyzer.segmented ||
         JSON.stringify(previousAnalyzer.stopWords) !== JSON.stringify(analyzer.stopWords))) {
         throw new TypeError(`Conflicting analyzer definitions for id ${analyzer.id}`);
       }
@@ -372,9 +373,11 @@ export class LexicalSearch<M extends JsonValue = Record<string, JsonValue>> {
       const groups = [...fp.expansions.values()].map(expansions => lists(field, expansions)).sort((a, b) =>
         a.reduce((n, p) => n + p.size, 0) - b.reduce((n, p) => n + p.size, 0));
       const found = new Set<string>();
-      for (const posting of groups[0]) for (const [id] of this.entries(posting, allowed)) {
+      // A segmented analyzer's tokens are separate words, so under OR one of them suffices; otherwise all must occur.
+      const anyToken = !phrase && operator === 'any' && !!field.analyzer.segmented;
+      for (const posting of anyToken ? groups.flat() : groups[0]) for (const [id] of this.entries(posting, allowed)) {
         stats.postingsVisited++;
-        if (found.has(id) || !accepts(id) || !groups.every(group => group.some(p => p.has(id)))) continue;
+        if (found.has(id) || !accepts(id) || (!anyToken && !groups.every(group => group.some(p => p.has(id))))) continue;
         if (phrase) {
           const stored = this.documents.get(id)!.fields.get(fp.name)!;
           let anchor = 0;

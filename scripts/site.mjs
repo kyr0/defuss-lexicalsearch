@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
+import { percent, renderRecall } from './docs.mjs';
 import { serve } from './server.mjs';
 
 // Drives the website in Chromium the way a visitor would: every section, every demo control, both tabs, the palette,
@@ -17,7 +18,12 @@ const LOAD_MS = 60_000;
 
 export async function runSite({ output }) {
   const manifest = JSON.parse(await readFile(join(root, 'docs/data/manifest.json'), 'utf8'));
-  const html = (await readFile(join(root, 'docs/index.html'), 'utf8')).replaceAll('&nbsp;', ' ');
+  const raw = await readFile(join(root, 'docs/index.html'), 'utf8');
+  const html = raw.replaceAll('&nbsp;', ' ');
+  // VERIFIED: the recall section is rendered from docs/data/recall.json, measured by bench/recall.mjs with this version.
+  const recall = JSON.parse(await readFile(join(root, 'docs/data/recall.json'), 'utf8'));
+  assert.equal(recall.version, manifest.version, 'docs/data/recall.json was measured with another version: run make docs');
+  assert.ok(raw.includes(renderRecall(recall)), 'docs/index.html recall section differs from docs/data/recall.json: run make docs');
   // The static markup carries the same figures the manifest holds, so the page reads right before the worker reports.
   for (const figure of [kb(manifest.library.coreGzipBytes), kb(manifest.corpus.bytes), mb(manifest.corpus.textBytes), `v${manifest.version}`, `${manifest.corpus.pages} pages`]) {
     assert.ok(html.includes(figure), `docs/index.html must state ${figure} (docs/data/manifest.json)`);
@@ -53,7 +59,7 @@ export async function runSite({ output }) {
 
     await check('one h1, every section present', async () => {
       assert.equal(await page.locator('h1').count(), 1);
-      for (const id of ['intro', 'demo', 'how', 'bench', 'consulting', 'use']) assert.equal(await page.locator(`#${id}`).count(), 1, `section #${id}`);
+      for (const id of ['intro', 'demo', 'how', 'bench', 'recall', 'consulting', 'use']) assert.equal(await page.locator(`#${id}`).count(), 1, `section #${id}`);
     });
 
     await check('corpus downloads and indexes; figures match the manifest', async () => {
@@ -129,6 +135,27 @@ export async function runSite({ output }) {
       for (const name of ['download', 'index', 'rare', 'typo']) assert.match(await text(`[data-bench="${name}"]`), /^\d+(\.\d+)? (µs|ms)$/, name);
     });
 
+    await check('recall per language: every strategy tab shows its figures', async () => {
+      const ids = await page.locator('#recall-tabs [role="tab"]').evaluateAll(tabs => tabs.map(tab => tab.id.replace('recall-tab-', '')));
+      assert.deepEqual([...ids].sort(), recall.strategies.map(s => s.id).sort());
+      for (const id of [...ids].reverse()) {
+        const strategy = recall.strategies.find(s => s.id === id);
+        await page.click(`#recall-tab-${id}`);
+        await page.waitForSelector(`#recall-panel-${id}:not([hidden])`);
+        assert.equal(await page.isVisible(`#recall-panel-${ids.find(other => other !== id)}`), false, 'one panel at a time');
+        assert.equal(await text(`[data-recall-mean="${id}"]`), percent(strategy.r5, 1));
+        const shown = await page.locator(`#recall-panel-${id} .progress-field`).evaluateAll(fields => fields.map(field =>
+          [field.dataset.recall, field.querySelector('output').textContent, Number(field.querySelector('progress').value)]));
+        assert.equal(shown.length, Object.keys(recall.languages).length);
+        for (const [code, label, value] of shown) {
+          assert.equal(label, percent(strategy.languages[code]), `${id} ${code}`);
+          assert.equal(value, Math.round(100 * strategy.languages[code]));
+        }
+        assert.deepEqual(shown.map(([, , value]) => value), shown.map(([, , value]) => value).sort((a, b) => b - a), 'sorted by R@5');
+      }
+      await page.locator('#recall').screenshot({ path: join(output, 'site-recall.png') });
+    });
+
     await check('my data: German notes, upsert, typo completion and inside-word search', async () => {
       await page.click('#tab-notes');
       await page.selectOption('#notes-analyzer', 'de');
@@ -152,6 +179,15 @@ export async function runSite({ output }) {
       await page.fill('#note-1-text', '');
       await page.waitForFunction(() => document.getElementById('notes-count').textContent === '6 notes indexed');
       await page.screenshot({ path: join(output, 'site-notes.png') });
+      // A language added with the analyzers of 0.3.0: an inflected Russian query finds its note.
+      await page.selectOption('#notes-analyzer', 'ru');
+      await page.waitForFunction(() => document.getElementById('log').textContent.includes('analyzer ru-lexicalsearch-v1'));
+      await page.click('#add-note');
+      await page.keyboard.type('Мы читали книги в библиотеке.');
+      await page.waitForFunction(() => document.getElementById('notes-count').textContent === '7 notes indexed');
+      await page.fill('#notes-q', 'библиотека');
+      await page.waitForFunction(() => document.querySelector('#notes-summary .ls-summary-query')?.textContent === 'библиотека');
+      assert.equal(await page.locator('#notes-results > li').count(), 1);
       await page.click('#tab-docs');
     });
 

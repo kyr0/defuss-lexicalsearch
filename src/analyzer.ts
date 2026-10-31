@@ -24,6 +24,7 @@ export function createAnalyzer(config: Analyzer): Analyzer {
     throw new TypeError('Analyzer requires a nonempty versioned id and tokenizer');
   }
   if (config.kind !== undefined && !['text', 'keyword'].includes(config.kind)) throw new TypeError('Invalid analyzer kind');
+  if (config.segmented !== undefined && typeof config.segmented !== 'boolean') throw new TypeError('segmented must be boolean');
   for (const fn of [config.normalize, config.stem, config.phonetic]) {
     if (fn !== undefined && typeof fn !== 'function') throw new TypeError('Invalid analyzer function');
   }
@@ -78,3 +79,27 @@ export const accentFoldedAnalyzer: Analyzer = Object.freeze({
 export const builtinAnalyzers: Readonly<Record<string, Analyzer>> = Object.freeze(Object.fromEntries(
   [unicodeAnalyzer, codeAnalyzer, keywordAnalyzer, foldedKeywordAnalyzer, whitespaceAnalyzer, accentFoldedAnalyzer].map(a => [a.id, a]),
 ));
+
+/** Like `tokenize`, after removing soft hyphens and zero-width (non-)joiners, which occur inside words. */
+export const tokenizeJoined = (text: string): string[] => tokenize(text.replace(/[­‌‍]/g, ''));
+
+/** Word-like segments of `Intl.Segmenter` for languages written without spaces between words. */
+export function segmentWords(locale: string): (text: string) => string[] {
+  const segmenter = new Intl.Segmenter(locale, { granularity: 'word' });
+  return text => Array.from(segmenter.segment(text.normalize('NFKC')))
+    .filter(segment => segment.isWordLike).map(segment => segment.segment);
+}
+
+/**
+ * Splits each word written in `script` into overlapping n-grams of code points, keeping the whole word too when
+ * `keepWord` is set; other words, such as Latin names in Korean text, and words of at most n code points stay whole.
+ */
+export function wordGrams(n: number, keepWord: boolean, script: RegExp, words: (text: string) => string[] = tokenizeJoined): (text: string) => string[] {
+  return text => words(text).flatMap(word => {
+    const chars = Array.from(word);
+    if (chars.length <= n || !script.test(word)) return [word];
+    const grams = keepWord ? [word] : [];
+    for (let i = 0; i + n <= chars.length; i++) grams.push(chars.slice(i, i + n).join(''));
+    return grams;
+  });
+}

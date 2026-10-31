@@ -1,0 +1,229 @@
+{
+  "version": "0.3.0",
+  "dataset": {
+    "name": "belebele-tiny-20-v1",
+    "url": "https://github.com/kyr0/tiny-embedding-bench/raw/refs/heads/main/datasets/tiny-embedding-bench-v1/dataset.json",
+    "sha256": "3d09d3653b72cf19c5226cd134bdd7d92ac31f2822cf45bc60879e7a95a75e6d",
+    "passages": 2000,
+    "questions": 1000,
+    "perLanguage": 50
+  },
+  "node": "v26.11.1",
+  "icu": "78.3",
+  "languages": {
+    "eng_Latn": {
+      "entry": "en",
+      "name": "English",
+      "method": "Snowball"
+    },
+    "deu_Latn": {
+      "entry": "de",
+      "name": "German",
+      "method": "Snowball"
+    },
+    "fra_Latn": {
+      "entry": "fr",
+      "name": "French",
+      "method": "Snowball"
+    },
+    "spa_Latn": {
+      "entry": "es",
+      "name": "Spanish",
+      "method": "Snowball"
+    },
+    "por_Latn": {
+      "entry": "pt",
+      "name": "Portuguese",
+      "method": "Snowball"
+    },
+    "ita_Latn": {
+      "entry": "it",
+      "name": "Italian",
+      "method": "Snowball"
+    },
+    "nld_Latn": {
+      "entry": "nl",
+      "name": "Dutch",
+      "method": "Snowball"
+    },
+    "pol_Latn": {
+      "entry": "pl",
+      "name": "Polish",
+      "method": "Snowball"
+    },
+    "rus_Cyrl": {
+      "entry": "ru",
+      "name": "Russian",
+      "method": "Snowball"
+    },
+    "tur_Latn": {
+      "entry": "tr",
+      "name": "Turkish",
+      "method": "Snowball"
+    },
+    "arb_Arab": {
+      "entry": "ar",
+      "name": "Arabic",
+      "method": "Snowball"
+    },
+    "hin_Deva": {
+      "entry": "hi",
+      "name": "Hindi",
+      "method": "Snowball"
+    },
+    "ben_Beng": {
+      "entry": "bn",
+      "name": "Bangla",
+      "method": "trigrams"
+    },
+    "urd_Arab": {
+      "entry": "ur",
+      "name": "Urdu",
+      "method": "trigrams"
+    },
+    "ind_Latn": {
+      "entry": "id",
+      "name": "Indonesian",
+      "method": "Snowball"
+    },
+    "vie_Latn": {
+      "entry": "vi",
+      "name": "Vietnamese",
+      "method": "tone folding"
+    },
+    "tha_Thai": {
+      "entry": "th",
+      "name": "Thai",
+      "method": "segmenter"
+    },
+    "zho_Hans": {
+      "entry": "zh",
+      "name": "Chinese",
+      "method": "segmenter"
+    },
+    "jpn_Jpan": {
+      "entry": "ja",
+      "name": "Japanese",
+      "method": "segmenter"
+    },
+    "kor_Hang": {
+      "entry": "ko",
+      "name": "Korean",
+      "method": "bigrams"
+    }
+  },
+  "strategies": [
+    {
+      "id": "default",
+      "name": "Default analyzer",
+      "description": "No language configuration: one field with unicodeAnalyzer, which splits words at spaces and punctuation.",
+      "r5": 0.7489999999999999,
+      "languages": {
+        "eng_Latn": 0.94,
+        "deu_Latn": 0.82,
+        "fra_Latn": 0.9,
+        "spa_Latn": 0.86,
+        "por_Latn": 0.88,
+        "ita_Latn": 0.94,
+        "nld_Latn": 0.86,
+        "pol_Latn": 0.8,
+        "rus_Cyrl": 0.84,
+        "tur_Latn": 0.76,
+        "arb_Arab": 0.88,
+        "hin_Deva": 0.82,
+        "ben_Beng": 0.82,
+        "urd_Arab": 0.86,
+        "ind_Latn": 0.94,
+        "vie_Latn": 0.92,
+        "tha_Thai": 0.26,
+        "zho_Hans": 0.1,
+        "jpn_Jpan": 0.02,
+        "kor_Hang": 0.76
+      }
+    },
+    {
+      "id": "fields",
+      "name": "Language fields",
+      "description": "One field per language with its analyzer; a question searches all 20 fields, so its language need not be known.",
+      "r5": 0.9219999999999999,
+      "languages": {
+        "eng_Latn": 0.9,
+        "deu_Latn": 0.78,
+        "fra_Latn": 0.9,
+        "spa_Latn": 0.9,
+        "por_Latn": 0.9,
+        "ita_Latn": 0.9,
+        "nld_Latn": 0.9,
+        "pol_Latn": 0.92,
+        "rus_Cyrl": 0.98,
+        "tur_Latn": 0.84,
+        "arb_Arab": 0.92,
+        "hin_Deva": 0.86,
+        "ben_Beng": 0.92,
+        "urd_Arab": 1,
+        "ind_Latn": 0.96,
+        "vie_Latn": 0.94,
+        "tha_Thai": 0.98,
+        "zho_Hans": 0.98,
+        "jpn_Jpan": 1,
+        "kor_Hang": 0.96
+      }
+    },
+    {
+      "id": "known",
+      "name": "Known language",
+      "description": "One field per language with its analyzer; a question searches its own language's field.",
+      "r5": 0.9730000000000001,
+      "languages": {
+        "eng_Latn": 1,
+        "deu_Latn": 0.98,
+        "fra_Latn": 1,
+        "spa_Latn": 0.98,
+        "por_Latn": 0.98,
+        "ita_Latn": 0.98,
+        "nld_Latn": 0.98,
+        "pol_Latn": 0.96,
+        "rus_Cyrl": 1,
+        "tur_Latn": 0.96,
+        "arb_Arab": 0.96,
+        "hin_Deva": 0.86,
+        "ben_Beng": 0.94,
+        "urd_Arab": 1,
+        "ind_Latn": 0.98,
+        "vie_Latn": 0.98,
+        "tha_Thai": 0.98,
+        "zho_Hans": 0.98,
+        "jpn_Jpan": 1,
+        "kor_Hang": 0.96
+      }
+    },
+    {
+      "id": "typing",
+      "name": "As you type",
+      "description": "Known language plus the website demo's defaults: completion, inside-word matching and typo tolerance.",
+      "r5": 0.9560000000000001,
+      "languages": {
+        "eng_Latn": 1,
+        "deu_Latn": 0.96,
+        "fra_Latn": 1,
+        "spa_Latn": 0.98,
+        "por_Latn": 1,
+        "ita_Latn": 0.96,
+        "nld_Latn": 0.94,
+        "pol_Latn": 0.96,
+        "rus_Cyrl": 1,
+        "tur_Latn": 0.96,
+        "arb_Arab": 0.9,
+        "hin_Deva": 0.78,
+        "ben_Beng": 0.94,
+        "urd_Arab": 0.94,
+        "ind_Latn": 0.94,
+        "vie_Latn": 0.98,
+        "tha_Thai": 0.94,
+        "zho_Hans": 0.98,
+        "jpn_Jpan": 1,
+        "kor_Hang": 0.96
+      }
+    }
+  ]
+}

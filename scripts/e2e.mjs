@@ -64,6 +64,18 @@ await writeFile(join(consumer, 'smoke.mjs'), `
   const other = new cjs.LexicalSearch({ analyzer: language.de });
   other.add({ id: 'b', fields: { text: 'Häuser' } });
   assert.equal(other.search('haus')[0].id, 'b');
+  // Every language entry resolves through the exports map in both module systems and finds an inflected word.
+  const samples = { en: ['running', 'run'], de: ['Häuser', 'haus'], es: ['hablando', 'hablar'], fr: ['manger', 'mange'], it: ['biblioteche', 'biblioteca'],
+    pt: ['bibliotecas', 'biblioteca'], nl: ['bibliotheken', 'bibliotheek'], pl: ['bibliotekach', 'biblioteka'], ru: ['библиотеке', 'библиотека'],
+    tr: ['kitapları', 'kitap'], id: ['membaca', 'baca'], vi: ['hòa', 'hoà'], ar: ['المكتبات', 'المكتبة'], ur: ['کتابیں', 'کتاب'], hi: ['किताबें', 'किताब'],
+    bn: ['গ্রন্থাগারে', 'গ্রন্থাগার'], ja: ['東京で猫を見た', '猫'], zh: ['我们在图书馆里读书', '图书馆'], ko: ['도서관에서', '도서관'], th: ['เราอ่านหนังสือในห้องสมุด', 'ห้องสมุด'] };
+  for (const [code, [text, query]] of Object.entries(samples)) {
+    const { default: esm } = await import('defuss-lexicalsearch/' + code);
+    assert.equal(require('defuss-lexicalsearch/' + code)[code].id, esm.id, code);
+    const multilingual = new LexicalSearch({ analyzer: esm });
+    multilingual.add({ id: code, fields: { text } });
+    assert.equal(multilingual.search(query)[0]?.id, code, code + ': ' + query + ' finds ' + text);
+  }
 `);
 // The consumer runs on both supported runtimes: Node.js (engines) and bun (packageManager).
 for (const runtime of [process.execPath, 'bun']) run(runtime, [join(consumer, 'smoke.mjs')], consumer);

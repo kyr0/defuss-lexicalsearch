@@ -1,5 +1,5 @@
-import { c as createAnalyzer, u as unicodeAnalyzer, a as analyze, b as builtinAnalyzers, d as codeAnalyzer, k as keywordAnalyzer } from './analyzer-CtBj-rhv.js';
-export { e as accentFoldedAnalyzer, f as foldedKeywordAnalyzer, n as normalizeToken, t as tokenize, w as whitespaceAnalyzer } from './analyzer-CtBj-rhv.js';
+import { c as createAnalyzer, u as unicodeAnalyzer, b as analyze, d as builtinAnalyzers, e as codeAnalyzer, k as keywordAnalyzer } from './analyzer-lEIu_Jj9.js';
+export { f as accentFoldedAnalyzer, g as foldedKeywordAnalyzer, n as normalizeToken, a as tokenize, h as whitespaceAnalyzer } from './analyzer-lEIu_Jj9.js';
 
 function parseQuery(query) {
   const free = [], phrases = [];
@@ -287,7 +287,7 @@ class LexicalSearch {
       if (!Number.isFinite(b) || b < 0 || b > 1) throw new RangeError("Field b must be in [0, 1]");
       const analyzer = createAnalyzer(schema[name].analyzer ?? this.analyzer);
       const previousAnalyzer = analyzerIds.get(analyzer.id);
-      if (previousAnalyzer && (previousAnalyzer.tokenize !== analyzer.tokenize || previousAnalyzer.normalize !== analyzer.normalize || previousAnalyzer.stem !== analyzer.stem || previousAnalyzer.phonetic !== analyzer.phonetic || previousAnalyzer.kind !== analyzer.kind || JSON.stringify(previousAnalyzer.stopWords) !== JSON.stringify(analyzer.stopWords))) {
+      if (previousAnalyzer && (previousAnalyzer.tokenize !== analyzer.tokenize || previousAnalyzer.normalize !== analyzer.normalize || previousAnalyzer.stem !== analyzer.stem || previousAnalyzer.phonetic !== analyzer.phonetic || previousAnalyzer.kind !== analyzer.kind || previousAnalyzer.segmented !== analyzer.segmented || JSON.stringify(previousAnalyzer.stopWords) !== JSON.stringify(analyzer.stopWords))) {
         throw new TypeError(`Conflicting analyzer definitions for id ${analyzer.id}`);
       }
       analyzerIds.set(analyzer.id, analyzer);
@@ -644,9 +644,10 @@ class LexicalSearch {
       const field = this.fields.get(fp.name);
       const groups = [...fp.expansions.values()].map((expansions) => lists(field, expansions)).sort((a, b) => a.reduce((n, p) => n + p.size, 0) - b.reduce((n, p) => n + p.size, 0));
       const found = /* @__PURE__ */ new Set();
-      for (const posting of groups[0]) for (const [id] of this.entries(posting, allowed2)) {
+      const anyToken = !phrase && operator === "any" && !!field.analyzer.segmented;
+      for (const posting of anyToken ? groups.flat() : groups[0]) for (const [id] of this.entries(posting, allowed2)) {
         stats.postingsVisited++;
-        if (found.has(id) || !accepts(id) || !groups.every((group) => group.some((p) => p.has(id)))) continue;
+        if (found.has(id) || !accepts(id) || !anyToken && !groups.every((group) => group.some((p) => p.has(id)))) continue;
         if (phrase) {
           const stored = this.documents.get(id).fields.get(fp.name);
           let anchor = 0;

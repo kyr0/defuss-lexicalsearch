@@ -1,4 +1,4 @@
-import { c as createAnalyzer, n as normalizeToken, t as tokenize } from './analyzer-CtBj-rhv.js';
+import { c as createAnalyzer, n as normalizeToken, a as tokenize } from './analyzer-lEIu_Jj9.js';
 import { s as stem_es } from './es-CmaGYjmH.js';
 import { s as spanishMetaphone } from './es-C7gyuI5X.js';
 import './stemmer-CH2wT9oZ.js';

@@ -1,7 +1,7 @@
 {
   "name": "defuss-lexicalsearch",
-  "version": "0.2.0",
-  "description": "Local lexical search with BM25, literal symbols, per-field analyzers, exact-first ranking and fuzzy/partial retrieval.",
+  "version": "0.3.0",
+  "description": "Local lexical search with BM25, literal symbols, per-field analyzers for 20 languages, exact-first ranking and fuzzy/partial retrieval.",
   "type": "module",
   "license": "MIT",
   "author": "Aron Homberg",
@@ -61,6 +61,126 @@
         "default": "./dist/fr.cjs"
       }
     },
+    "./it": {
+      "import": {
+        "types": "./dist/it.d.ts",
+        "default": "./dist/it.js"
+      },
+      "require": {
+        "types": "./dist/it.d.cts",
+        "default": "./dist/it.cjs"
+      }
+    },
+    "./pt": {
+      "import": {
+        "types": "./dist/pt.d.ts",
+        "default": "./dist/pt.js"
+      },
+      "require": {
+        "types": "./dist/pt.d.cts",
+        "default": "./dist/pt.cjs"
+      }
+    },
+    "./nl": {
+      "import": {
+        "types": "./dist/nl.d.ts",
+        "default": "./dist/nl.js"
+      },
+      "require": {
+        "types": "./dist/nl.d.cts",
+        "default": "./dist/nl.cjs"
+      }
+    },
+    "./pl": {
+      "import": {
+        "types": "./dist/pl.d.ts",
+        "default": "./dist/pl.js"
+      },
+      "require": {
+        "types": "./dist/pl.d.cts",
+        "default": "./dist/pl.cjs"
+      }
+    },
+    "./ru": {
+      "import": {
+        "types": "./dist/ru.d.ts",
+        "default": "./dist/ru.js"
+      },
+      "require": {
+        "types": "./dist/ru.d.cts",
+        "default": "./dist/ru.cjs"
+      }
+    },
+    "./tr": {
+      "import": {
+        "types": "./dist/tr.d.ts",
+        "default": "./dist/tr.js"
+      },
+      "require": {
+        "types": "./dist/tr.d.cts",
+        "default": "./dist/tr.cjs"
+      }
+    },
+    "./id": {
+      "import": {
+        "types": "./dist/id.d.ts",
+        "default": "./dist/id.js"
+      },
+      "require": {
+        "types": "./dist/id.d.cts",
+        "default": "./dist/id.cjs"
+      }
+    },
+    "./vi": {
+      "import": {
+        "types": "./dist/vi.d.ts",
+        "default": "./dist/vi.js"
+      },
+      "require": {
+        "types": "./dist/vi.d.cts",
+        "default": "./dist/vi.cjs"
+      }
+    },
+    "./ar": {
+      "import": {
+        "types": "./dist/ar.d.ts",
+        "default": "./dist/ar.js"
+      },
+      "require": {
+        "types": "./dist/ar.d.cts",
+        "default": "./dist/ar.cjs"
+      }
+    },
+    "./ur": {
+      "import": {
+        "types": "./dist/ur.d.ts",
+        "default": "./dist/ur.js"
+      },
+      "require": {
+        "types": "./dist/ur.d.cts",
+        "default": "./dist/ur.cjs"
+      }
+    },
+    "./hi": {
+      "import": {
+        "types": "./dist/hi.d.ts",
+        "default": "./dist/hi.js"
+      },
+      "require": {
+        "types": "./dist/hi.d.cts",
+        "default": "./dist/hi.cjs"
+      }
+    },
+    "./bn": {
+      "import": {
+        "types": "./dist/bn.d.ts",
+        "default": "./dist/bn.js"
+      },
+      "require": {
+        "types": "./dist/bn.d.cts",
+        "default": "./dist/bn.cjs"
+      }
+    },
     "./ja": {
       "import": {
         "types": "./dist/ja.d.ts",
@@ -69,6 +189,36 @@
       "require": {
         "types": "./dist/ja.d.cts",
         "default": "./dist/ja.cjs"
+      }
+    },
+    "./zh": {
+      "import": {
+        "types": "./dist/zh.d.ts",
+        "default": "./dist/zh.js"
+      },
+      "require": {
+        "types": "./dist/zh.d.cts",
+        "default": "./dist/zh.cjs"
+      }
+    },
+    "./ko": {
+      "import": {
+        "types": "./dist/ko.d.ts",
+        "default": "./dist/ko.js"
+      },
+      "require": {
+        "types": "./dist/ko.d.cts",
+        "default": "./dist/ko.cjs"
+      }
+    },
+    "./th": {
+      "import": {
+        "types": "./dist/th.d.ts",
+        "default": "./dist/th.js"
+      },
+      "require": {
+        "types": "./dist/th.d.cts",
+        "default": "./dist/th.cjs"
       }
     },
     "./phonetic": {

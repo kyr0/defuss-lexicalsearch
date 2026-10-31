@@ -15,6 +15,7 @@ function createAnalyzer(config) {
     throw new TypeError("Analyzer requires a nonempty versioned id and tokenizer");
   }
   if (config.kind !== void 0 && !["text", "keyword"].includes(config.kind)) throw new TypeError("Invalid analyzer kind");
+  if (config.segmented !== void 0 && typeof config.segmented !== "boolean") throw new TypeError("segmented must be boolean");
   for (const fn of [config.normalize, config.stem, config.phonetic]) {
     if (fn !== void 0 && typeof fn !== "function") throw new TypeError("Invalid analyzer function");
   }
@@ -61,5 +62,19 @@ const accentFoldedAnalyzer = Object.freeze({
 const builtinAnalyzers = Object.freeze(Object.fromEntries(
   [unicodeAnalyzer, codeAnalyzer, keywordAnalyzer, foldedKeywordAnalyzer, whitespaceAnalyzer, accentFoldedAnalyzer].map((a) => [a.id, a])
 ));
+const tokenizeJoined = (text) => tokenize(text.replace(/[­‌‍]/g, ""));
+function segmentWords(locale) {
+  const segmenter = new Intl.Segmenter(locale, { granularity: "word" });
+  return (text) => Array.from(segmenter.segment(text.normalize("NFKC"))).filter((segment) => segment.isWordLike).map((segment) => segment.segment);
+}
+function wordGrams(n, keepWord, script, words = tokenizeJoined) {
+  return (text) => words(text).flatMap((word) => {
+    const chars = Array.from(word);
+    if (chars.length <= n || !script.test(word)) return [word];
+    const grams = keepWord ? [word] : [];
+    for (let i = 0; i + n <= chars.length; i++) grams.push(chars.slice(i, i + n).join(""));
+    return grams;
+  });
+}
 
-export { analyze as a, builtinAnalyzers as b, createAnalyzer as c, codeAnalyzer as d, accentFoldedAnalyzer as e, foldedKeywordAnalyzer as f, keywordAnalyzer as k, normalizeToken as n, tokenize as t, unicodeAnalyzer as u, whitespaceAnalyzer as w };
+export { tokenize as a, analyze as b, createAnalyzer as c, builtinAnalyzers as d, codeAnalyzer as e, accentFoldedAnalyzer as f, foldedKeywordAnalyzer as g, whitespaceAnalyzer as h, keywordAnalyzer as k, normalizeToken as n, segmentWords as s, tokenizeJoined as t, unicodeAnalyzer as u, wordGrams as w };

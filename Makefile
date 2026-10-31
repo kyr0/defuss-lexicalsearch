@@ -30,9 +30,10 @@ build: ## clean ESM, CommonJS and declaration build into dist/
 metrics: build ## print byte sizes of the built ESM modules
 	@wc -c dist/*.js dist/*/index.js
 
-bench: build ## synthetic benchmarks over N documents (1000–100000) → output/bench/
+bench: build ## synthetic benchmarks over N documents (1000–100000) and R@k per language on tiny-embedding-bench-v1 → output/bench/
 	bun run bench $(N)
 	bun run bench:api $(N)
+	node bench/recall.mjs
 
 test: ## clean build, then Node tests and ESM/CJS consumer type checks
 	bun run test
@@ -53,7 +54,8 @@ e2e: ## pack the tarball → clean consumer → Node, Chromium and the website �
 
 verify: lint test coverage e2e ## what CI runs: every gate verb, cheapest first
 
-docs: build ## copy the ESM build into docs/assets/lib and refresh docs/data/manifest.json (the website)
+docs: build ## copy the ESM build into docs/assets/lib, refresh docs/data/ and the R@5 figures of the website and README
+	node bench/recall.mjs --site
 	node scripts/docs.mjs
 
 demo: docs ## serve the website at / and the examples at /examples/ on 127.0.0.1:8080

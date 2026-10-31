@@ -1,9 +1,9 @@
 {
-  "version": "0.2.0",
+  "version": "0.3.0",
   "library": {
-    "files": 16,
-    "coreBytes": 43811,
-    "coreGzipBytes": 11718
+    "files": 41,
+    "coreBytes": 44878,
+    "coreGzipBytes": 12078
   },
   "corpus": {
     "file": "defuss-shadcn-docs.json.gz",

@@ -194,13 +194,10 @@ const handlers = {
   },
 
   async 'notes-analyzer'({ analyzer }) {
-    const loaders = {
-      unicode: async () => unicodeAnalyzer, code: async () => codeAnalyzer,
-      en: async () => (await import('./lib/en.js')).default, de: async () => (await import('./lib/de.js')).default,
-      es: async () => (await import('./lib/es.js')).default, fr: async () => (await import('./lib/fr.js')).default,
-      ja: async () => (await import('./lib/ja.js')).default,
-    };
-    notesAnalyzer = await loaders[analyzer]();
+    // Language analyzers load on demand, one module per language; the select in index.html lists the 20 codes.
+    const builtin = { unicode: unicodeAnalyzer, code: codeAnalyzer };
+    if (!Object.hasOwn(builtin, analyzer) && !/^[a-z]{2}$/.test(analyzer)) throw new Error(`Unknown analyzer ${analyzer}`);
+    notesAnalyzer = builtin[analyzer] ?? (await import(`./lib/${analyzer}.js`)).default;
     notes = new LexicalSearch({ analyzer: notesAnalyzer });
     const started = now();
     for (const [id, text] of noteTexts) notes.upsert({ id, fields: { text } });

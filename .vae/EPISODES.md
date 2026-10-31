@@ -47,3 +47,9 @@ Wrap: EVERY lead becomes a test | .vae/VERIFY.py rule | one MEMORY line with BC,
 2026-10-31T00:27:30Z s=ab460516 FINDING package.json:scripts.test, scripts/e2e.mjs, test/readme.test.mjs learn=test: make test runs the suite under bun test after node --test (114/114 each); make e2e runs smoke.mjs and usage.mjs with bun and records its version in output/e2e/r
 2026-10-31T00:52:54Z s=ab460516 DONE fp=db1c7f718551 cov=75.0% paths=.oxlintrc.json,AGENTS.md,ARCH.md,CHANGELOG.md(+83)
 2026-10-31T00:52:54Z s=ab460516 FINDING README.md#quick-start, docs/index.html#use, CHANGELOG.md learn=none: release facts from the registry, no recurring invariant; the README example test still runs every example.
+2026-10-31T15:01:53Z s=4e5a9027 DONE fp=27ff8e030a29 cov=75.5% paths=ARCH.md,CHANGELOG.md,Makefile,README.md(+80)
+2026-10-31T15:01:53Z s=4e5a9027 FINDING src/ru.ts:normalize learn=test: test/languages.test.mjs 'Russian ignores stress marks' asserts the precomposed case.
+2026-10-31T15:01:53Z s=4e5a9027 FINDING src/vi.ts:foldVietnameseTone learn=test: test/languages.test.mjs Vietnamese test asserts résumé stays distinct from resumé.
+2026-10-31T15:01:53Z s=4e5a9027 FINDING src/ru.ts:12, src/vi.ts:3 learn=none: one-off authoring slip; grep for U+0300-U+036F in src/*.ts finds only the ru doc comment example.
+2026-10-31T15:01:53Z s=4e5a9027 FINDING ARCH.md:9 learn=none: prose precision fix; numbers come from bench runs in this session.
+2026-10-31T15:01:53Z s=4e5a9027 FINDING scripts/snowball.mjs:12 learn=none: doc fix; grep finds no other reference.

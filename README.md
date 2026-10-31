@@ -14,7 +14,7 @@ Search inside an app, over documentation, API references or notes, needs ranked 
 - Literal modes that compare original strings: `exact`, `prefix`, `suffix` and `substring`, case-sensitive by default.
 - Search as you type: completion, inside-word matching, Levenshtein or transposition-aware typos, and completion despite a typo (`Kül` finds `Kühlschrank`).
 - Quoted phrases, AND and OR, exclusions, field restrictions, metadata and ID filters, and pagination.
-- Analyzers for Unicode words, code identifiers, keywords and whitespace-separated symbols; stemming, stopwords and phonetic codes for English, German, Spanish and French; word segmentation for Japanese.
+- Analyzers for Unicode words, code identifiers, keywords and whitespace-separated symbols, and for 20 languages: Snowball stemming for 13 (stopwords for 8, phonetic codes for English, German, Spanish and French), word segmentation for Japanese, Chinese and Thai, n-grams for Korean, Bangla and Urdu, and tone folding for Vietnamese. With the question's language known, the gold passage ranks in the top 5 of 2,000 for 97.3% of questions on average (see [Retrieval quality by language](#retrieval-quality-by-language)).
 - Atomic batch inserts and replacements, complete deletion, JSON snapshots and size-bounded loading from a URL.
 - ESM and CommonJS builds with TypeScript declarations, and a module Worker example for browsers.
 
@@ -72,6 +72,28 @@ console.log(index.search('"remote store"').map(hit => hit.id)); // [ 'b' ]
 ```
 
 Without an `analyzer` option, an index uses `unicodeAnalyzer`: NFKC normalization, lowercase, Unicode letters, digits and combining marks as words, and punctuation as a separator, with no stemming and no stopwords. It cannot tell `C++` from `C#`, because both analyze to `c`; the next section handles symbols.
+
+### Search text in many languages
+
+Give each language its own field with its analyzer, and restrict a query to the field of its language when the application knows it:
+
+```ts
+import { LexicalSearch } from 'defuss-lexicalsearch';
+import ru from 'defuss-lexicalsearch/ru';
+import ja from 'defuss-lexicalsearch/ja';
+
+const index = new LexicalSearch({ fields: { ru: { analyzer: ru }, ja: { analyzer: ja } } });
+index.addAll([
+  { id: 'ru-1', fields: { ru: 'Мы читали книги в библиотеке.' } },
+  { id: 'ja-1', fields: { ja: '東京の図書館で本を読んだ。' } },
+]);
+
+console.log(index.search('библиотека', { fields: ['ru'] }).map(hit => hit.id)); // [ 'ru-1' ]
+console.log(index.search('図書館はどこ', { fields: ['ja'] }).map(hit => hit.id)); // [ 'ja-1' ]
+console.log(index.search('図書館はどこ', { fields: ['ja'], operator: 'all' }).map(hit => hit.id)); // []
+```
+
+The Russian analyzer stems `библиотеке` and `библиотека` to one term. Japanese, Chinese and Thai write words without spaces, so their analyzers are `segmented`: the words of one unspaced query fragment count as separate words, and under the default OR one of them suffices. `operator: 'all'` requires every word, and `どこ` occurs in no document. Without `fields`, a query searches every language field; that needs no language detection but matches shared words across languages, and in the benchmark below it lowers mean R@5 from 97.3% to 92.2%.
 
 ### Search API symbols and identifiers
 
@@ -260,11 +282,58 @@ Alternatives of one analyzed query token in one field contribute once, with thei
 | `whitespaceAnalyzer` | Whitespace-delimited symbols; case and punctuation kept |
 | `accentFoldedAnalyzer` | NFKD, combining marks removed, lowercase; accents no longer distinguish words |
 | `defuss-lexicalsearch/en`, `/de`, `/es`, `/fr` | Snowball stemmer, stopwords and phonetic encoder |
-| `defuss-lexicalsearch/ja` | Word segmentation by `Intl.Segmenter`, so results depend on the runtime's ICU data |
+| `/ru`, `/it`, `/pt`, `/nl` | Snowball stemmer and stopwords; `ru` also drops stress marks (`приве́т` finds `привет`) and folds `ё` to `е` |
+| `/pl`, `/id`, `/ar`, `/hi` | Snowball stemmer |
+| `/tr` | Snowball stemmer, Turkish casing (`I` to `ı`, `İ` to `i`), and the suffix after an apostrophe dropped (`İstanbul'da` indexes `istanbul`) |
+| `/ja`, `/zh`, `/th` | Word segmentation by `Intl.Segmenter`, so results depend on the runtime's ICU data; `segmented` |
+| `/ko` | Overlapping syllable bigrams of Hangul words, so `학교` matches inside `학교에서`; `segmented` |
+| `/bn`, `/ur` | Each word plus its overlapping trigrams, which stand in for a stemmer; `ur` folds Arabic kaf and yeh to their Urdu forms and drops short vowel marks; `segmented` |
+| `/vi` | Vietnamese syllables with one tone mark position, so `hòa` and `hoà` match |
 
-`createAnalyzer({ id, tokenize, normalize?, stem?, stopWords?, phonetic?, kind? })` builds a custom analyzer; without `normalize`, it applies NFKC and lowercase. A `kind: 'keyword'` tokenizer must return the whole nonempty input as one token, and intentional changes belong in `normalize`. Give the analyzer a new versioned ID whenever its behavior changes: an index rejects two different definitions under one ID, and a snapshot cannot check that a supplied function still matches the behavior its ID had when the snapshot was written.
+The analyzers for `ru`, `it`, `pt`, `nl`, `pl`, `id`, `ar`, `hi`, `tr`, `ko`, `bn`, `ur` and `vi` remove soft hyphens and zero-width (non-)joiners inside words before splitting text, so `perpus\u00ADtakaan` stays one word. N-gram analyzers split only words in their own script and keep, for example, a Latin name whole.
 
-Stopwords keep their positions for phrases but are left out of the free-query requirements. Language analyzers are explicit imports; the library never guesses a language. The stemmers and phonetic encoders are exported separately from `defuss-lexicalsearch/stem` and `defuss-lexicalsearch/phonetic`.
+`createAnalyzer({ id, tokenize, normalize?, stem?, stopWords?, phonetic?, kind?, segmented? })` builds a custom analyzer; without `normalize`, it applies NFKC and lowercase. A `kind: 'keyword'` tokenizer must return the whole nonempty input as one token, and intentional changes belong in `normalize`. With `segmented: true`, the tokens of one whitespace-delimited query fragment count as separate words: under `operator: 'any'` the fragment matches when one of them occurs, while `operator: 'all'` and quoted phrases still require all of them. Give the analyzer a new versioned ID whenever its behavior changes: an index rejects two different definitions under one ID, and a snapshot cannot check that a supplied function still matches the behavior its ID had when the snapshot was written.
+
+Stopwords keep their positions for phrases but are left out of the free-query requirements. Language analyzers are explicit imports; the library never guesses a language. The stemmers (`stem_en` to `stem_tr`) and phonetic encoders are exported separately from `defuss-lexicalsearch/stem` and `defuss-lexicalsearch/phonetic`.
+
+### Retrieval quality by language
+
+`make bench` measures R@5 on [tiny-embedding-bench-v1](https://github.com/kyr0/tiny-embedding-bench/tree/main/datasets/tiny-embedding-bench-v1), the benchmark [defuss-vectorsearch](https://github.com/kyr0/defuss-vectorsearch) reports: 100 Belebele passages and 50 questions, each in 20 languages, with one gold passage per question. All 2,000 passages form one index, so a question also competes with the 19 translations of its gold passage, and it scores when the gold passage in its own language ranks in the top 5. Each value is the share of a language's 50 questions, so a step of 2% is one question.
+
+- **Known language:** one field per language with its analyzer; a question searches its own language's field.
+- **Language fields:** the same index; a question searches all 20 fields.
+- **As you type:** known language with `prefix`, `substring`, `fuzzy` and `transpositions`, the website demo's settings.
+- **Default analyzer:** one field with `unicodeAnalyzer`.
+
+Every strategy indexes tokens of up to 1,024 code points, because without segmentation a Thai sentence becomes one token longer than the default limit of 128.
+
+<!-- recall-table:start -->
+| Language | Entry | Analysis | Known language | Language fields | As you type | Default analyzer |
+| --- | --- | --- | ---: | ---: | ---: | ---: |
+| English | `en` | Snowball | 100% | 90% | 100% | 94% |
+| French | `fr` | Snowball | 100% | 90% | 100% | 90% |
+| Japanese | `ja` | segmenter | 100% | 100% | 100% | 2% |
+| Russian | `ru` | Snowball | 100% | 98% | 100% | 84% |
+| Urdu | `ur` | trigrams | 100% | 100% | 94% | 86% |
+| German | `de` | Snowball | 98% | 78% | 96% | 82% |
+| Indonesian | `id` | Snowball | 98% | 96% | 94% | 94% |
+| Italian | `it` | Snowball | 98% | 90% | 96% | 94% |
+| Dutch | `nl` | Snowball | 98% | 90% | 94% | 86% |
+| Portuguese | `pt` | Snowball | 98% | 90% | 100% | 88% |
+| Spanish | `es` | Snowball | 98% | 90% | 98% | 86% |
+| Thai | `th` | segmenter | 98% | 98% | 94% | 26% |
+| Vietnamese | `vi` | tone folding | 98% | 94% | 98% | 92% |
+| Chinese | `zh` | segmenter | 98% | 98% | 98% | 10% |
+| Arabic | `ar` | Snowball | 96% | 92% | 90% | 88% |
+| Korean | `ko` | bigrams | 96% | 96% | 96% | 76% |
+| Polish | `pl` | Snowball | 96% | 92% | 96% | 80% |
+| Turkish | `tr` | Snowball | 96% | 84% | 96% | 76% |
+| Bangla | `bn` | trigrams | 94% | 92% | 94% | 82% |
+| Hindi | `hi` | Snowball | 86% | 86% | 78% | 82% |
+| **Mean** |  |  | **97.3%** | **92.2%** | **95.6%** | **74.9%** |
+<!-- recall-table:end -->
+
+The Default analyzer column shows why the language analyzers exist: Thai, Chinese and Japanese have no spaces between words, so one unsegmented question finds almost nothing. The figures are deterministic for one build and runtime; segmentation follows the runtime's ICU data. `make docs` writes them to `docs/data/recall.json`, the website and this table.
 
 `fuzzy: true` allows no edit for 1 or 2 code points, one edit for 3 to 5 and two edits from 6; `fuzzy: 0`, `1` or `2` sets the radius explicitly. Edits follow Levenshtein distance by default, and `transpositions: true` switches to optimal string alignment, which counts an adjacent swap as one edit (restricted Damerau, **not unrestricted Damerau-Levenshtein**). With `prefix: true` as well, a term also matches when one of its prefixes lies within the radius, at that prefix's distance. With `phonetic: true` and an analyzer that has a phonetic encoder (the language analyzers), matching phonetic codes boost a fuzzy candidate; they never retrieve a word that is not within the edit distance.
 
@@ -304,9 +373,9 @@ For every field, indexing runs the field's analyzer and adds the tokens to posti
 
 ## Website
 
-The website at [lexicalsearch.defuss.org](https://lexicalsearch.defuss.org), built from `docs/`, is the project page and a live demo. It downloads 410 pages of defuss-shadcn documentation, indexes them in a Web Worker and searches them as you type, with every match mode, a page palette, a hidden needle to find, a notes index of your own with seven analyzers, and a benchmark measured in your browser. `make demo` serves it on `127.0.0.1:8080`, with the examples under `/examples/`: `/examples/browser.html` searches natural text and `/examples/api.html` searches API symbols.
+The website at [lexicalsearch.defuss.org](https://lexicalsearch.defuss.org), built from `docs/`, is the project page and a live demo. It downloads 410 pages of defuss-shadcn documentation, indexes them in a Web Worker and searches them as you type, with every match mode, a page palette, a hidden needle to find, a notes index of your own with 22 analyzers, a benchmark measured in your browser, and R@5 per language for each search strategy. `make demo` serves it on `127.0.0.1:8080`, with the examples under `/examples/`: `/examples/browser.html` searches natural text and `/examples/api.html` searches API symbols.
 
-GitHub Pages serves `docs/` without a build step. The page loads defuss-shadcn from jsDelivr with subresource integrity and the library from `docs/assets/lib`. After a library change, `make docs` copies the ESM build there and rewrites `docs/data/manifest.json`; the e2e compares every figure on the page with that manifest.
+GitHub Pages serves `docs/` without a build step. The page loads defuss-shadcn from jsDelivr with subresource integrity and the library from `docs/assets/lib`. After a library change, `make docs` copies the ESM build there, rewrites `docs/data/manifest.json`, measures R@5 per language into `docs/data/recall.json` (it downloads the benchmark dataset into `input/` once and checks its pinned SHA-256) and renders those figures into the page and the table above. The e2e compares every figure on the page with these files.
 
 ## Development
 
@@ -327,4 +396,4 @@ make setup && make verify
 
 ## License
 
-MIT, see [LICENSE](LICENSE).
+MIT, see [LICENSE](LICENSE). The stemmers in `src/stem/` and the stopword lists for Russian, Italian, Portuguese and Dutch come from [Snowball](https://snowballstem.org/) under the BSD 3-Clause license, whose text is in `src/stem/snowball.ts`. `node scripts/snowball.mjs <snowball checkout>` regenerates the stemmers for Arabic, Hindi, Indonesian, Italian, Dutch, Polish, Portuguese, Russian and Turkish from Snowball 3.1.1.

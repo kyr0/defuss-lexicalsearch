@@ -10,6 +10,10 @@ export interface Analyzer {
   readonly phonetic?: (token: string) => string;
   /** Keyword analyzers preserve the complete nonempty field as one token. */
   readonly kind?: 'text' | 'keyword';
+  /** Tokens of one whitespace-delimited query fragment are separate words, as in Japanese, Chinese or Thai. Under
+   * `operator: 'any'` the fragment then matches when one of its words occurs; otherwise all of them must occur.
+   * VERIFIED: a per-analyzer flag, because one query can search fields of spaced and unspaced languages at once. */
+  readonly segmented?: boolean;
 }
 export interface FieldOptions {
   weight?: number;

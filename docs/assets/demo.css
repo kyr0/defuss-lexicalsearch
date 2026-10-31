@@ -238,6 +238,13 @@
   .ls-bench-table .ls-num { text-align: end; }
   .ls-num { text-align: end; font-family: var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
   .ls-bench-wait { color: var(--muted-foreground); }
+  .ls-recall { margin: 0; align-self: start; aspect-ratio: auto; overflow: visible; background: var(--card); }
+  .ls-recall-tabs .tab-list { margin-block-end: .75rem; max-width: 100%; overflow-x: auto; }
+  .ls-recall-note { margin: 0 0 .75rem; font-size: .8125rem; color: var(--muted-foreground); }
+  .ls-recall-list { display: grid; gap: .5rem 1.25rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr)); }
+  .ls-recall-list .progress-label { display: inline-flex; align-items: center; gap: .375rem; }
+  .ls-footnote { margin: 0; font-size: .75rem; color: var(--muted-foreground); }
+  .ls-footnote-mark { font-size: .5em; color: var(--muted-foreground); }
   @media (max-width: 40rem) { .ls-tier-list .badge { min-width: 7rem; } }
 
   @media (prefers-reduced-motion: reduce) {

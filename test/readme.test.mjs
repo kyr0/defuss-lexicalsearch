@@ -27,3 +27,9 @@ test('README examples run and print the output their comments state', async () =
     assert.deepEqual(printed ? printed.split('\n') : [], expected, `README example ${i + 1}:\n${code}`);
   }
 });
+
+test('the README R@5 table matches docs/data/recall.json, as the website does', async () => {
+  const { renderRecallTable } = await import('../scripts/docs.mjs');
+  const recall = JSON.parse(await readFile(new URL('docs/data/recall.json', root), 'utf8'));
+  assert.ok(readme.includes(renderRecallTable(recall)), 'README.md recall table differs from docs/data/recall.json: run make docs');
+});
