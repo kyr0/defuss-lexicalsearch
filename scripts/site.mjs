@@ -65,7 +65,11 @@ export async function runSite({ output }) {
     await check('corpus downloads and indexes; figures match the manifest', async () => {
       await page.waitForFunction(() => document.getElementById('ring').api?.getState().name === 'complete', null, { timeout: LOAD_MS });
       assert.equal(await page.evaluate(() => document.getElementById('p-index').api.getState().name), 'complete');
-      assert.equal(await text('#hero-version'), `v${manifest.version}`);
+      // The npm tags in the hero, header, phone menu and install section carry the version and link to the package.
+      for (const id of ['hero-version', 'header-version', 'menu-version', 'use-version']) {
+        assert.equal(await text(`#${id}`), `v${manifest.version}`, id);
+        assert.equal(await page.locator(`#${id}`).evaluate(node => node.closest('a')?.href), 'https://www.npmjs.com/package/defuss-lexicalsearch', id);
+      }
       assert.equal(await text('#hero-size'), `in ${kb(manifest.library.coreGzipBytes)} of gzipped JavaScript`);
       assert.equal(await text('#intro-size'), kb(manifest.library.coreGzipBytes));
       assert.equal(await text('#demo-pages'), String(manifest.corpus.pages));
@@ -154,6 +158,14 @@ export async function runSite({ output }) {
         assert.deepEqual(shown.map(([, , value]) => value), shown.map(([, , value]) => value).sort((a, b) => b - a), 'sorted by R@5');
       }
       await page.locator('#recall').screenshot({ path: join(output, 'site-recall.png') });
+      // The README shows this card: 2x pixels, and reduced motion so the scroll reveal has settled. `cp` it to
+      // docs/assets/recall.png after a re-measurement.
+      const sharp = await browser.newContext({ viewport: { width: 1280, height: 900 }, deviceScaleFactor: 2, colorScheme: 'light', reducedMotion: 'reduce' });
+      const card = await sharp.newPage();
+      watch(card);
+      await card.goto(`${url}#recall`);
+      await card.locator('.ls-recall').screenshot({ path: join(output, 'recall.png') });
+      await sharp.close();
     });
 
     await check('my data: German notes, upsert, typo completion and inside-word search', async () => {

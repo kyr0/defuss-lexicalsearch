@@ -1,22 +1,42 @@
 # defuss-lexicalsearch
 
 [![npm](https://img.shields.io/npm/v/defuss-lexicalsearch)](https://www.npmjs.com/package/defuss-lexicalsearch)
+[![npm downloads](https://img.shields.io/npm/dw/defuss-lexicalsearch)](https://www.npmjs.com/package/defuss-lexicalsearch)
+[![types](https://img.shields.io/npm/types/defuss-lexicalsearch)](https://www.npmjs.com/package/defuss-lexicalsearch)
+[![gzip size](https://img.shields.io/bundlejs/size/defuss-lexicalsearch)](https://bundlejs.com/?q=defuss-lexicalsearch)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
 Full-text search for TypeScript and JavaScript apps, in the browser or Node.js: ranked, typo-tolerant search over your documents and exact matching for symbols such as `C++` or `Array.prototype.map`, in one in-memory index with zero runtime dependencies.
 
+**Live demo and benchmarks: [lexicalsearch.defuss.org](https://lexicalsearch.defuss.org)**
+
 ## TL;DR
 
-Search inside an app, over documentation, API references or notes, needs ranked search that forgives typos and fragments, and exact matches for symbols that a word tokenizer breaks apart: `C++` and `C#` both become the word `c`. defuss-lexicalsearch answers both from one index inside the page or process: indexing and search need no server and no network access. With exact-first ranking, an exact symbol match always ranks above a partial one.
+- **Ranked and exact in one index.** Field-weighted BM25 with an analyzer per field; exact-first ranking keeps an exact symbol above every partial match, although a word tokenizer reads both `C++` and `C#` as `c`.
+- **Search as you type.** Completion, inside-word matching and typo tolerance, also inside the part typed so far: `Kül` finds `Kühlschrank`.
+- **20 languages.** A stemmer, word segmentation or n-grams per language, measured below.
+- **Literal modes.** `exact`, `prefix`, `suffix` and `substring` compare the original strings, case-sensitive by default.
+- **Queries and filters.** Quoted phrases, AND and OR, exclusions, field restrictions, metadata and ID filters, and pagination.
+- **Index lifecycle.** Atomic batch inserts and replacements, complete deletion, JSON snapshots and size-bounded loading from a URL.
+- **Ships anywhere.** ESM and CommonJS with TypeScript declarations, and a module Worker example; indexing and search need no server and no network.
 
-- Field-weighted BM25 with an analyzer per field, and derived fields that analyze one string twice, for example as a raw symbol and as code words.
-- Exact-first ranking in tiers: `literal`, `keyword`, `identifier-prefix`, `term`, `partial`, `fuzzy` and `incomplete`; BM25 orders the results within a tier.
-- Literal modes that compare original strings: `exact`, `prefix`, `suffix` and `substring`, case-sensitive by default.
-- Search as you type: completion, inside-word matching, Levenshtein or transposition-aware typos, and completion despite a typo (`Kül` finds `Kühlschrank`).
-- Quoted phrases, AND and OR, exclusions, field restrictions, metadata and ID filters, and pagination.
-- Analyzers for Unicode words, code identifiers, keywords and whitespace-separated symbols, and for 20 languages: Snowball stemming for 13 (stopwords for 8, phonetic codes for English, German, Spanish and French), word segmentation for Japanese, Chinese and Thai, n-grams for Korean, Bangla and Urdu, and tone folding for Vietnamese. With the question's language known, the gold passage ranks in the top 5 of 2,000 for 97.3% of questions on average (see [Retrieval quality by language](#retrieval-quality-by-language)).
-- Atomic batch inserts and replacements, complete deletion, JSON snapshots and size-bounded loading from a URL.
-- ESM and CommonJS builds with TypeScript declarations, and a module Worker example for browsers.
+### Languages at a glance
+
+Import a language's analyzer from `defuss-lexicalsearch/<entry>`. R@5 is the share of a language's 50 benchmark questions whose gold passage ranks in the top 5 of 2,000 passages; [Retrieval quality by language](#retrieval-quality-by-language) explains the benchmark.
+
+<!-- languages:start -->
+| Analysis | Entries | R@5, language known |
+| --- | --- | ---: |
+| Snowball stemming | `en` `de` `fr` `es` `pt` `it` `nl` `pl` `ru` `tr` `ar` `hi` `id` | 86–100% |
+| Word segmentation | `th` `zh` `ja` | 98–100% |
+| Syllable bigrams | `ko` | 96% |
+| Words plus trigrams | `bn` `ur` | 94–100% |
+| Tone mark folding | `vi` | 98% |
+
+Mean R@5 over all 20 languages: **97.3%** when each question searches its language's field, **74.9%** with the default analyzer and no language setup.
+<!-- languages:end -->
+
+[![R@5 by query language, one tab per search strategy, on the project website](https://raw.githubusercontent.com/kyr0/defuss-lexicalsearch/main/docs/assets/recall.png)](https://lexicalsearch.defuss.org/#recall)
 
 ## Quick start
 
@@ -93,7 +113,7 @@ console.log(index.search('図書館はどこ', { fields: ['ja'] }).map(hit => hi
 console.log(index.search('図書館はどこ', { fields: ['ja'], operator: 'all' }).map(hit => hit.id)); // []
 ```
 
-The Russian analyzer stems `библиотеке` and `библиотека` to one term. Japanese, Chinese and Thai write words without spaces, so their analyzers are `segmented`: the words of one unspaced query fragment count as separate words, and under the default OR one of them suffices. `operator: 'all'` requires every word, and `どこ` occurs in no document. Without `fields`, a query searches every language field; that needs no language detection but matches shared words across languages, and in the benchmark below it lowers mean R@5 from 97.3% to 92.2%.
+The Russian analyzer stems `библиотеке` and `библиотека` to one term. Japanese, Chinese and Thai write words without spaces, so their analyzers are `segmented`: the words of one unspaced query fragment count as separate words, and under the default OR one of them suffices. `operator: 'all'` requires every word, and `どこ` occurs in no document. Without `fields`, a query searches every language field; that needs no language detection but matches shared words across languages, which costs recall: compare the Known language and Language fields columns of the table below.
 
 ### Search API symbols and identifiers
 
@@ -375,7 +395,7 @@ For every field, indexing runs the field's analyzer and adds the tokens to posti
 
 The website at [lexicalsearch.defuss.org](https://lexicalsearch.defuss.org), built from `docs/`, is the project page and a live demo. It downloads 410 pages of defuss-shadcn documentation, indexes them in a Web Worker and searches them as you type, with every match mode, a page palette, a hidden needle to find, a notes index of your own with 22 analyzers, a benchmark measured in your browser, and R@5 per language for each search strategy. `make demo` serves it on `127.0.0.1:8080`, with the examples under `/examples/`: `/examples/browser.html` searches natural text and `/examples/api.html` searches API symbols.
 
-GitHub Pages serves `docs/` without a build step. The page loads defuss-shadcn from jsDelivr with subresource integrity and the library from `docs/assets/lib`. After a library change, `make docs` copies the ESM build there, rewrites `docs/data/manifest.json`, measures R@5 per language into `docs/data/recall.json` (it downloads the benchmark dataset into `input/` once and checks its pinned SHA-256) and renders those figures into the page and the table above. The e2e compares every figure on the page with these files.
+GitHub Pages serves `docs/` without a build step. `docs/assets/recall.png`, the image at the top of this page, is a copy of `output/e2e/recall.png` from `make e2e`. The page loads defuss-shadcn from jsDelivr with subresource integrity and the library from `docs/assets/lib`. After a library change, `make docs` copies the ESM build there, rewrites `docs/data/manifest.json`, measures R@5 per language into `docs/data/recall.json` (it downloads the benchmark dataset into `input/` once and checks its pinned SHA-256) and renders those figures into the page and the table above. The e2e compares every figure on the page with these files.
 
 ## Development
 

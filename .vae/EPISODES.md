@@ -54,3 +54,8 @@ Wrap: EVERY lead becomes a test | .vae/VERIFY.py rule | one MEMORY line with BC,
 2026-10-31T15:01:53Z s=4e5a9027 FINDING ARCH.md:9 learn=none: prose precision fix; numbers come from bench runs in this session.
 2026-10-31T15:01:53Z s=4e5a9027 FINDING scripts/snowball.mjs:12 learn=none: doc fix; grep finds no other reference.
 2026-10-31T15:03:29Z s=4e5a9027 DONE fp=8a29c1f1d83b cov=75.5% paths=ARCH.md,CHANGELOG.md,Makefile,README.md(+79)
+2026-10-31T15:17:25Z s=4e5a9027 DONE fp=3e064076c0db cov=75.5% paths=ARCH.md,CHANGELOG.md,Makefile,README.md(+80)
+2026-10-31T15:17:25Z s=4e5a9027 FINDING docs/index.html:526 (recall tile) learn=test: scripts/site.mjs already fails when the section differs from renderRecall(recall.json).
+2026-10-31T15:17:25Z s=4e5a9027 FINDING docs/index.html:124 hero pill, :923 install learn=none: visual detail checked by screenshot; site.mjs asserts the version text and link of each tag.
+2026-10-31T15:17:25Z s=4e5a9027 FINDING scripts/docs.mjs:renderLanguageGlance learn=none: simplification.
+2026-10-31T15:17:25Z s=4e5a9027 FINDING docs/index.html agent prompt learn=none: copy fix.

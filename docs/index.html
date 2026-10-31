@@ -80,6 +80,7 @@
           <span class="swap-on"><svg class="ls-icon" aria-hidden="true"><use href="#i-moon"/></svg></span>
           <span class="swap-off"><svg class="ls-icon" aria-hidden="true"><use href="#i-sun"/></svg></span>
         </label>
+        <a class="btn mk-header-wide ls-npm-tag" data-variant="outline" data-size="sm" href="https://www.npmjs.com/package/defuss-lexicalsearch" target="_blank" rel="noopener"><svg class="ls-icon" aria-hidden="true"><use href="#i-package"/></svg>npm <span class="badge" data-variant="secondary" data-size="xs" id="header-version">v0.3.0</span><span class="sr-only"> (opens in a new tab)</span></a>
         <a class="btn mk-header-wide" data-variant="ghost" data-size="icon" href="https://github.com/kyr0/defuss-lexicalsearch" aria-label="defuss-lexicalsearch on GitHub"><svg class="ls-icon" aria-hidden="true"><use href="#i-github"/></svg></a>
         <button type="button" class="btn mk-header-menu" data-variant="ghost" data-size="icon" data-sheet-trigger="ls-menu" aria-haspopup="dialog" aria-label="Open menu"><svg class="ls-icon" aria-hidden="true"><use href="#i-menu"/></svg></button>
       </div>
@@ -101,6 +102,7 @@
         </div>
         <div class="sheet-footer mk-header-sheet-actions">
           <a class="btn" data-variant="outline" href="https://github.com/kyr0/defuss-lexicalsearch"><svg class="ls-icon" aria-hidden="true"><use href="#i-github"/></svg>GitHub</a>
+          <a class="btn" data-variant="outline" href="https://www.npmjs.com/package/defuss-lexicalsearch"><svg class="ls-icon" aria-hidden="true"><use href="#i-package"/></svg>npm <span class="badge" data-variant="secondary" data-size="xs" id="menu-version">v0.3.0</span></a>
         </div>
       </div>
     </dialog>
@@ -119,7 +121,7 @@
     <div class="parallax-content">
       <section class="mk-hero" style="width:100%">
         <div class="mk-hero-copy">
-          <a class="mk-hero-pill" href="#demo"><span class="badge" data-variant="default" data-size="sm" id="hero-version">v0.3.0</span>No server, no API key, nothing leaves your browser <svg class="ls-icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+          <div class="mk-hero-pill ls-hero-pill"><a class="badge" data-variant="default" data-size="sm" href="https://www.npmjs.com/package/defuss-lexicalsearch" target="_blank" rel="noopener">npm&nbsp;<span id="hero-version">v0.3.0</span><span class="sr-only"> (opens in a new tab)</span></a><a href="#demo">No server, no API key, nothing leaves your browser <svg class="ls-icon" aria-hidden="true"><use href="#i-arrow"/></svg></a></div>
           <h1 class="mk-hero-title"><strong>Lexical</strong> search that finds the <i>exact</i> word, symbol or phrase</h1>
           <p class="ls-flip"><span class="text-rotate"><span>
               <span class="ls-accent">with BM25 relevance ranking</span>
@@ -526,7 +528,7 @@
           <div class="mk-stats-grid">
             <div class="mk-stat" data-recall-stat="known"><span class="mk-stat-value">97.3%</span><span class="mk-stat-label">mean R@5 over 20 languages when the question's language is known</span></div>
             <div class="mk-stat" data-recall-stat="fields"><span class="mk-stat-value">92.2%</span><span class="mk-stat-label">when each question searches all 20 language fields</span></div>
-            <div class="mk-stat" data-recall-stat="rus"><span class="mk-stat-value">100%</span><span class="mk-stat-label">R@5 for English, French, and Russian questions with the <code>ru</code>, <code>fr</code>, and <code>en</code> analyzers</span><a href="https://github.com/kyr0/defuss-lexicalsearch#retrieval-quality-by-language" class="btn mk-stat-link" data-variant="link" data-size="default" target="_blank" rel="noopener">All languages<svg class="ls-icon ls-ext" aria-hidden="true"><use href="#i-external"/></svg><span class="sr-only"> (opens in a new tab)</span></a></div>
+            <div class="mk-stat" data-recall-stat="en-fr-ru"><span class="mk-stat-value">100%</span><span class="mk-stat-label">R@5 for English, French, and Russian questions with the <code>en</code>, <code>fr</code>, and <code>ru</code> analyzers</span><a href="https://github.com/kyr0/defuss-lexicalsearch#retrieval-quality-by-language" class="btn mk-stat-link" data-variant="link" data-size="default" target="_blank" rel="noopener">All languages<svg class="ls-icon ls-ext" aria-hidden="true"><use href="#i-external"/></svg><span class="sr-only"> (opens in a new tab)</span></a></div>
             <div class="mk-stat" data-recall-stat="default"><span class="mk-stat-value">74.9%</span><span class="mk-stat-label">with the default analyzer and no language setup</span></div>
           </div>
           <p class="ls-footnote">* Deterministic: the same build and runtime always return the same ranks. Measured on Node.js 26.11.1; word segmentation for Japanese, Chinese and Thai follows the runtime's ICU data (here 78.3).</p>
@@ -918,7 +920,7 @@
     <div class="ls-ways">
       <div class="ls-way">
         <h3 class="ls-way-title"><svg class="ls-icon" aria-hidden="true"><use href="#i-package"/></svg>Package</h3>
-        <p class="ls-way-desc">Install it from npm with <code>npm install defuss-lexicalsearch</code>, or <code>bun add defuss-lexicalsearch</code>. Then, in Node.js or the browser:</p>
+        <p class="ls-way-desc">Install <a class="badge" data-variant="outline" data-size="sm" href="https://www.npmjs.com/package/defuss-lexicalsearch" target="_blank" rel="noopener">npm&nbsp;<span id="use-version">v0.3.0</span><span class="sr-only"> (opens in a new tab)</span></a> with <code>npm install defuss-lexicalsearch</code>, or <code>bun add defuss-lexicalsearch</code>. Then, in Node.js or the browser:</p>
         <figure class="mk-code-block" data-variant="file">
           <div class="mk-code-block-head"><span class="mk-code-block-file"><svg class="ls-icon" aria-hidden="true"><use href="#i-file"/></svg>search.js</span><button class="mk-code-block-copy" type="button" aria-label="Copy code"><svg class="ls-icon" aria-hidden="true"><use href="#i-copy"/></svg></button></div>
           <pre data-numbers><code id="usage-code"><span><span class="mk-code-block-k">import</span> { LexicalSearch } <span class="mk-code-block-k">from</span> <span class="mk-code-block-s">"defuss-lexicalsearch"</span>;</span><span></span><span><span class="mk-code-block-k">const</span> index = <span class="mk-code-block-k">new</span> LexicalSearch({ fields: { title: { weight: <span class="mk-code-block-n">3</span> }, body: {} } });</span><span>index.addAll([{ id: <span class="mk-code-block-s">"dialog"</span>, fields: { title: <span class="mk-code-block-s">"Dialog"</span>, body: <span class="mk-code-block-s">"A modal window for focused tasks."</span> } }]);</span><span></span><span><span class="mk-code-block-k">const</span> hits = index.search(<span class="mk-code-block-s">"dialgo"</span>, { fuzzy: <span class="mk-code-block-k">true</span>, transpositions: <span class="mk-code-block-k">true</span> });</span><span>console.log(hits[<span class="mk-code-block-n">0</span>].id); <span class="mk-code-block-c">// "dialog", despite the typo</span></span></code></pre>
@@ -934,7 +936,7 @@
           <div class="mockup-code" data-chrome="mac" data-title="coding agent · ~/your-app" data-wrap id="agent-prompt">
           <pre data-prefix=">"><code>Integrate defuss-lexicalsearch into this app: https://github.com/kyr0/defuss-lexicalsearch</code></pre>
           <pre data-prefix=""><code>Install the npm package defuss-lexicalsearch and read its README first. Index documents with new LexicalSearch({ fields }) and addAll(), then search with search(query, options): { prefix: true, substring: true, fuzzy: true, transpositions: true } for a search box, mode: "exact" for identifiers.</code></pre>
-          <pre data-prefix=""><code>For code symbols, start from apiSearchPreset, which keeps programming languages apart; for German, English, Spanish or French text, import the language analyzer.</code></pre>
+          <pre data-prefix=""><code>For code symbols, start from apiSearchPreset, which keeps programming languages apart; for natural-language text, import the analyzer of its language, such as defuss-lexicalsearch/ru (20 languages).</code></pre>
           <pre data-prefix=""><code>Index large collections in a Web Worker, and persist them with serialize() and LexicalSearch.fromJSON().</code></pre>
             <pre data-prefix="" data-tone="muted" data-cursor><code>send</code></pre>
           </div>

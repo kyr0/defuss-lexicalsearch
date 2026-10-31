@@ -26,7 +26,7 @@ const setStat = (name, text) => { document.querySelector(`[data-stat="${name}"]`
 
 // ---- manifest figures: the page is written with the current numbers, the manifest keeps them honest ----------------
 const applyManifest = ({ version, library, corpus }) => {
-  $('hero-version').textContent = `v${version}`;
+  for (const id of ['hero-version', 'header-version', 'menu-version', 'use-version']) $(id).textContent = `v${version}`;
   $('hero-size').textContent = `in ${kb(library.coreGzipBytes)} of gzipped JavaScript`;
   $('intro-size').textContent = kb(library.coreGzipBytes);
   $('demo-pages').textContent = corpus.pages.toLocaleString('en');
