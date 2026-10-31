@@ -53,3 +53,4 @@ Wrap: EVERY lead becomes a test | .vae/VERIFY.py rule | one MEMORY line with BC,
 2026-10-31T15:01:53Z s=4e5a9027 FINDING src/ru.ts:12, src/vi.ts:3 learn=none: one-off authoring slip; grep for U+0300-U+036F in src/*.ts finds only the ru doc comment example.
 2026-10-31T15:01:53Z s=4e5a9027 FINDING ARCH.md:9 learn=none: prose precision fix; numbers come from bench runs in this session.
 2026-10-31T15:01:53Z s=4e5a9027 FINDING scripts/snowball.mjs:12 learn=none: doc fix; grep finds no other reference.
+2026-10-31T15:03:29Z s=4e5a9027 DONE fp=8a29c1f1d83b cov=75.5% paths=ARCH.md,CHANGELOG.md,Makefile,README.md(+79)
