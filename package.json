@@ -1,6 +1,6 @@
 {
   "name": "defuss-lexicalsearch",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Local lexical search with BM25, literal symbols, per-field analyzers for 20 languages, exact-first ranking and fuzzy/partial retrieval.",
   "type": "module",
   "license": "MIT",
@@ -261,6 +261,7 @@
     "prepack": "tsc --noEmit && pkgroll --clean-dist"
   },
   "devDependencies": {
+    "defuss-lid": "0.5.0",
     "oxlint": "1.90.0",
     "pkgroll": "2.29.0",
     "playwright": "1.63.0",

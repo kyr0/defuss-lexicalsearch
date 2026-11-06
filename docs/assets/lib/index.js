@@ -1,5 +1,5 @@
-import { c as createAnalyzer, u as unicodeAnalyzer, b as analyze, d as builtinAnalyzers, e as codeAnalyzer, k as keywordAnalyzer } from './analyzer-lEIu_Jj9.js';
-export { f as accentFoldedAnalyzer, g as foldedKeywordAnalyzer, n as normalizeToken, a as tokenize, h as whitespaceAnalyzer } from './analyzer-lEIu_Jj9.js';
+import { c as createAnalyzer, u as unicodeAnalyzer, b as analyze, p as primaryLanguage, d as builtinAnalyzers, e as codeAnalyzer, k as keywordAnalyzer } from './analyzer-CQNufUmw.js';
+export { f as accentFoldedAnalyzer, g as foldedKeywordAnalyzer, n as normalizeToken, a as tokenize, h as whitespaceAnalyzer } from './analyzer-CQNufUmw.js';
 
 function parseQuery(query) {
   const free = [], phrases = [];
@@ -287,7 +287,7 @@ class LexicalSearch {
       if (!Number.isFinite(b) || b < 0 || b > 1) throw new RangeError("Field b must be in [0, 1]");
       const analyzer = createAnalyzer(schema[name].analyzer ?? this.analyzer);
       const previousAnalyzer = analyzerIds.get(analyzer.id);
-      if (previousAnalyzer && (previousAnalyzer.tokenize !== analyzer.tokenize || previousAnalyzer.normalize !== analyzer.normalize || previousAnalyzer.stem !== analyzer.stem || previousAnalyzer.phonetic !== analyzer.phonetic || previousAnalyzer.kind !== analyzer.kind || previousAnalyzer.segmented !== analyzer.segmented || JSON.stringify(previousAnalyzer.stopWords) !== JSON.stringify(analyzer.stopWords))) {
+      if (previousAnalyzer && (previousAnalyzer.tokenize !== analyzer.tokenize || previousAnalyzer.normalize !== analyzer.normalize || previousAnalyzer.stem !== analyzer.stem || previousAnalyzer.phonetic !== analyzer.phonetic || previousAnalyzer.kind !== analyzer.kind || previousAnalyzer.segmented !== analyzer.segmented || previousAnalyzer.language !== analyzer.language || JSON.stringify(previousAnalyzer.stopWords) !== JSON.stringify(analyzer.stopWords))) {
         throw new TypeError(`Conflicting analyzer definitions for id ${analyzer.id}`);
       }
       analyzerIds.set(analyzer.id, analyzer);
@@ -500,6 +500,11 @@ class LexicalSearch {
     if (mode !== "lexical" && (options.prefix || options.suffix || options.substring || options.fuzzy || options.phonetic)) throw new TypeError("Literal modes cannot use lexical expansions");
     const names = options.fields ? [...new Set(options.fields)].sort() : [...this.fields.keys()];
     for (const name of names) if (!this.fields.has(name)) throw new TypeError(`Unknown search field: ${name}`);
+    if (options.language !== void 0 && typeof options.language !== "string") throw new TypeError("language must be a string");
+    const language = options.language === void 0 ? void 0 : primaryLanguage(options.language);
+    const languageBoost = options.languageBoost ?? 3;
+    if (typeof languageBoost !== "number" || !Number.isFinite(languageBoost) || languageBoost < 1 || languageBoost > 1e6) throw new RangeError("languageBoost must be in [1, 1000000]");
+    const weightOf = (field) => language !== void 0 && field.analyzer.language === language ? field.weight * languageBoost : field.weight;
     const stats = { expandedTerms: 0, postingsVisited: 0, candidatesScored: 0 };
     const excluded = /* @__PURE__ */ new Set();
     for (const negative of options.exclude ?? []) {
@@ -547,8 +552,8 @@ class LexicalSearch {
             candidate = { id, score: 0, quality: mode === "exact" ? 6 : mode === "substring" ? 2 : 4, matches: [] };
             candidates2.set(id, candidate);
           }
-          candidate.score += field.weight;
-          if (options.explain) candidate.matches.push({ query, term: text, field: name, kind: "literal", distance: 0, score: field.weight });
+          candidate.score += weightOf(field);
+          if (options.explain) candidate.matches.push({ query, term: text, field: name, kind: "literal", distance: 0, score: weightOf(field) });
         };
         if (mode === "exact" && caseSensitive) {
           const matches = field.raw.get(query);
@@ -623,7 +628,7 @@ class LexicalSearch {
       const active = clauses[0].fields.flatMap((fp) => [...fp.expansions].flatMap(([term, exps]) => exps.flatMap((exp) => this.fields.get(fp.name).postings.has(exp.term) ? [{ name: fp.name, term, exp }] : [])));
       if (active.length === 1) {
         const { name, term, exp } = active[0], field = this.fields.get(name), posting = field.postings.get(exp.term);
-        const score = bm25Scorer(posting.size, field.documents, field.tokens / field.documents, this.k1, field.b, exp.weight * field.weight);
+        const score = bm25Scorer(posting.size, field.documents, field.tokens / field.documents, this.k1, field.b, exp.weight * weightOf(field));
         const noMatches = [];
         for (const [id, positions] of this.entries(posting, options.ids)) {
           stats.postingsVisited++;
@@ -681,7 +686,7 @@ class LexicalSearch {
         for (const exp of expansions) {
           const posting = field.postings.get(exp.term);
           if (!posting) continue;
-          const scorer = bm25Scorer(posting.size, field.documents, field.tokens / field.documents, this.k1, field.b, exp.weight * field.weight);
+          const scorer = bm25Scorer(posting.size, field.documents, field.tokens / field.documents, this.k1, field.b, exp.weight * weightOf(field));
           for (const [id, positions] of this.entries(posting, allowed)) {
             stats.postingsVisited++;
             const score = scorer(positions.length, this.documents.get(id).fields.get(name).tokens.length);

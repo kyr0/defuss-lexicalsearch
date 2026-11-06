@@ -75,7 +75,14 @@ await writeFile(join(consumer, 'smoke.mjs'), `
     const multilingual = new LexicalSearch({ analyzer: esm });
     multilingual.add({ id: code, fields: { text } });
     assert.equal(multilingual.search(query)[0]?.id, code, code + ': ' + query + ' finds ' + text);
+    assert.equal(esm.language, code, code + ' names its language');
   }
+  // The language option boosts the guessed language's field and keeps the other language's match.
+  const { default: en } = await import('defuss-lexicalsearch/en');
+  const routed = new LexicalSearch({ fields: { de: { analyzer: de }, en: { analyzer: en } } });
+  routed.addAll([{ id: 'de', fields: { de: 'Pinguine im Zoo' } }, { id: 'en', fields: { en: 'penguins at the zoo' } }]);
+  assert.deepEqual(routed.search('zoo', { language: 'de' }).map(hit => hit.id), ['de', 'en']);
+  assert.deepEqual(routed.search('zoo', { language: 'en' }).map(hit => hit.id), ['en', 'de']);
 `);
 // The consumer runs on both supported runtimes: Node.js (engines) and bun (packageManager).
 for (const runtime of [process.execPath, 'bun']) run(runtime, [join(consumer, 'smoke.mjs')], consumer);
@@ -88,7 +95,7 @@ for (const runtime of [process.execPath, 'bun']) assert.equal(run(runtime, [join
 const report = {
   finishedAt: new Date().toISOString(), tarball: basename(tarball), bytes: (await stat(tarball)).size, files: files.size,
   node: process.version, bun: run('bun', ['--version'], consumer).trim(), browser, site: { manifest: siteManifest, checks: site.checks },
-  passed: ['tarball holds only package.json, README.md, LICENSE and dist/ build files', 'every packed build file reachable from exports', 'ESM/CJS consumer smoke on Node.js and bun', 'Chromium examples, direct imports and module Worker', `website: ${site.checks.length} checks`, 'website usage snippet'],
+  passed: ['tarball holds only package.json, README.md, LICENSE and dist/ build files', 'every packed build file reachable from exports', 'ESM/CJS consumer smoke on Node.js and bun, including the language option', 'Chromium examples, direct imports and module Worker', `website: ${site.checks.length} checks`, 'website usage snippet'],
 };
 await writeFile(join(output, 'report.json'), JSON.stringify(report, null, 2) + '\n');
 console.log(`PASS e2e: ${report.tarball} (${report.bytes} bytes, ${report.files} files), Node ${report.node}, bun ${report.bun}, Chromium ${browser}, website ${site.checks.length} checks`);

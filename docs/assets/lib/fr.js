@@ -1,4 +1,4 @@
-import { c as createAnalyzer, n as normalizeToken, a as tokenize } from './analyzer-lEIu_Jj9.js';
+import { c as createAnalyzer, n as normalizeToken, a as tokenize } from './analyzer-CQNufUmw.js';
 import { s as stem_fr } from './fr-BjxYllgE.js';
 import { p as phonetic } from './fr-CSzQ9l4f.js';
 import './stemmer-CH2wT9oZ.js';
@@ -500,6 +500,7 @@ const DEFAULT_STOPWORDS_FR = [
 
 const fr = createAnalyzer({
   id: "fr-lexicalsearch-v1",
+  language: "fr",
   tokenize,
   normalize: normalizeToken,
   stem: stem_fr,

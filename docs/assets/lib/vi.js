@@ -1,4 +1,4 @@
-import { c as createAnalyzer, t as tokenizeJoined, n as normalizeToken } from './analyzer-lEIu_Jj9.js';
+import { c as createAnalyzer, t as tokenizeJoined, n as normalizeToken } from './analyzer-CQNufUmw.js';
 
 const TONES = /[\u0300\u0301\u0303\u0309\u0323]/u;
 const VOWEL = new RegExp("[aeiouy]\\p{M}*$", "u");
@@ -17,6 +17,7 @@ function foldVietnameseTone(syllable) {
 }
 const vi = createAnalyzer({
   id: "vi-lexicalsearch-v1",
+  language: "vi",
   tokenize: tokenizeJoined,
   normalize: (token) => foldVietnameseTone(normalizeToken(token))
 });

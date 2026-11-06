@@ -1,4 +1,4 @@
-import { analyze, builtinAnalyzers, createAnalyzer, unicodeAnalyzer } from './analyzer';
+import { analyze, builtinAnalyzers, createAnalyzer, primaryLanguage, unicodeAnalyzer } from './analyzer';
 import { parseQuery } from './query';
 import { bm25Scorer } from './bm25';
 import { TopK } from './heap';
@@ -61,7 +61,7 @@ export class LexicalSearch<M extends JsonValue = Record<string, JsonValue>> {
       const previousAnalyzer = analyzerIds.get(analyzer.id);
       if (previousAnalyzer && (previousAnalyzer.tokenize !== analyzer.tokenize || previousAnalyzer.normalize !== analyzer.normalize ||
         previousAnalyzer.stem !== analyzer.stem || previousAnalyzer.phonetic !== analyzer.phonetic || previousAnalyzer.kind !== analyzer.kind ||
-        previousAnalyzer.segmented !== analyzer.segmented ||
+        previousAnalyzer.segmented !== analyzer.segmented || previousAnalyzer.language !== analyzer.language ||
         JSON.stringify(previousAnalyzer.stopWords) !== JSON.stringify(analyzer.stopWords))) {
         throw new TypeError(`Conflicting analyzer definitions for id ${analyzer.id}`);
       }
@@ -236,6 +236,14 @@ export class LexicalSearch<M extends JsonValue = Record<string, JsonValue>> {
     if (mode !== 'lexical' && (options.prefix || options.suffix || options.substring || options.fuzzy || options.phonetic)) throw new TypeError('Literal modes cannot use lexical expansions');
     const names = options.fields ? [...new Set(options.fields)].sort() : [...this.fields.keys()];
     for (const name of names) if (!this.fields.has(name)) throw new TypeError(`Unknown search field: ${name}`);
+    if (options.language !== undefined && typeof options.language !== 'string') throw new TypeError('language must be a string');
+    const language = options.language === undefined ? undefined : primaryLanguage(options.language);
+    const languageBoost = options.languageBoost ?? 3;
+    if (typeof languageBoost !== 'number' || !Number.isFinite(languageBoost) || languageBoost < 1 || languageBoost > 1e6) throw new RangeError('languageBoost must be in [1, 1000000]');
+    // A boost, not a field restriction. VERIFIED (2026-11-06 probe, defuss-lid 0.5.0 major_20 guesses): searching only the
+    // guessed field lost 4 of 22 keyword queries over defuss-search's sample notes, such as "penguins" (guessed French),
+    // which the boost still finds; ARCH.md has the benchmark figures.
+    const weightOf = (field: FieldIndex) => language !== undefined && field.analyzer.language === language ? field.weight * languageBoost : field.weight;
     const stats: SearchStats = { expandedTerms: 0, postingsVisited: 0, candidatesScored: 0 };
     const excluded = new Set<string>();
     for (const negative of options.exclude ?? []) {
@@ -276,8 +284,8 @@ export class LexicalSearch<M extends JsonValue = Record<string, JsonValue>> {
           if (!accepts(id)) return;
           let candidate = candidates.get(id);
           if (!candidate) { candidate = { id, score: 0, quality: mode === 'exact' ? 6 : mode === 'substring' ? 2 : 4, matches: [] }; candidates.set(id, candidate); }
-          candidate.score += field.weight;
-          if (options.explain) candidate.matches.push({ query, term: text, field: name, kind: 'literal', distance: 0, score: field.weight });
+          candidate.score += weightOf(field);
+          if (options.explain) candidate.matches.push({ query, term: text, field: name, kind: 'literal', distance: 0, score: weightOf(field) });
         };
         if (mode === 'exact' && caseSensitive) {
           const matches = field.raw.get(query);
@@ -353,7 +361,7 @@ export class LexicalSearch<M extends JsonValue = Record<string, JsonValue>> {
         this.fields.get(fp.name)!.postings.has(exp.term) ? [{ name: fp.name, term, exp }] : [])));
       if (active.length === 1) {
         const { name, term, exp } = active[0], field = this.fields.get(name)!, posting = field.postings.get(exp.term)!;
-        const score = bm25Scorer(posting.size, field.documents, field.tokens / field.documents, this.k1, field.b, exp.weight * field.weight);
+        const score = bm25Scorer(posting.size, field.documents, field.tokens / field.documents, this.k1, field.b, exp.weight * weightOf(field));
         const noMatches: TermMatch[] = [];
         for (const [id, positions] of this.entries(posting, options.ids)) {
           stats.postingsVisited++;
@@ -412,7 +420,7 @@ export class LexicalSearch<M extends JsonValue = Record<string, JsonValue>> {
         for (const exp of expansions) {
           const posting = field.postings.get(exp.term);
           if (!posting) continue;
-          const scorer = bm25Scorer(posting.size, field.documents, field.tokens / field.documents, this.k1, field.b, exp.weight * field.weight);
+          const scorer = bm25Scorer(posting.size, field.documents, field.tokens / field.documents, this.k1, field.b, exp.weight * weightOf(field));
           for (const [id, positions] of this.entries(posting, allowed)) {
             stats.postingsVisited++;
             const score = scorer(positions.length, this.documents.get(id)!.fields.get(name)!.tokens.length);

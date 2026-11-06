@@ -19,12 +19,21 @@ export const codeAnalyzer: Analyzer = Object.freeze({
   normalize: normalizeToken,
 });
 
+/** Primary language subtag of a BCP 47 tag, canonical and lowercase: `de-CH` → `de`, `iw` → `he`. */
+export function primaryLanguage(tag: string): string {
+  try { return new Intl.Locale(tag).language; } catch { throw new RangeError(`Invalid BCP 47 language tag: ${String(tag)}`); }
+}
+
 export function createAnalyzer(config: Analyzer): Analyzer {
   if (!config || typeof config.id !== 'string' || !config.id || typeof config.tokenize !== 'function') {
     throw new TypeError('Analyzer requires a nonempty versioned id and tokenizer');
   }
   if (config.kind !== undefined && !['text', 'keyword'].includes(config.kind)) throw new TypeError('Invalid analyzer kind');
   if (config.segmented !== undefined && typeof config.segmented !== 'boolean') throw new TypeError('segmented must be boolean');
+  // Canonical form only: a search canonicalizes its tag the same way, so `iw` here would never match a search for `iw`.
+  if (config.language !== undefined && (typeof config.language !== 'string' || primaryLanguage(config.language) !== config.language)) {
+    throw new TypeError('language must be a canonical lowercase ISO 639 code such as de');
+  }
   for (const fn of [config.normalize, config.stem, config.phonetic]) {
     if (fn !== undefined && typeof fn !== 'function') throw new TypeError('Invalid analyzer function');
   }

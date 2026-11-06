@@ -9,7 +9,7 @@ const word = /[\p{L}\p{N}][\p{L}\p{N}\p{M}]*/gu;
  * VERIFIED: snapshots persist the id and fromJSON resolves analyzers by it; change it when behavior changes.
  */
 export const tr = createAnalyzer({
-  id: 'tr-lexicalsearch-v1',
+  id: 'tr-lexicalsearch-v1', language: 'tr',
   tokenize: (text: string) => (text.normalize('NFKC').replace(/[­‌‍]/g, '')
     .replace(/([\p{L}\p{N}])['’][\p{L}\p{M}]+/gu, '$1').match(word) ?? []),
   normalize: (token: string) => token.normalize('NFKC').toLocaleLowerCase('tr'),

@@ -1,4 +1,4 @@
-import { c as createAnalyzer, n as normalizeToken, t as tokenizeJoined } from './analyzer-lEIu_Jj9.js';
+import { c as createAnalyzer, n as normalizeToken, t as tokenizeJoined } from './analyzer-CQNufUmw.js';
 import { s as stem_nl } from './nl-5bGSeKKo.js';
 import './snowball-COqm-oKm.js';
 
@@ -108,6 +108,7 @@ const DEFAULT_STOPWORDS_NL = [
 
 const nl = createAnalyzer({
   id: "nl-lexicalsearch-v1",
+  language: "nl",
   tokenize: tokenizeJoined,
   normalize: normalizeToken,
   stem: stem_nl,

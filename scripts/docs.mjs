@@ -44,13 +44,16 @@ const escape = text => text.replace(/[&<>"]/g, char => ({ '&': '&amp;', '<': '&l
 export const percent = (share, digits = 0) => `${(100 * share).toFixed(digits)}%`;
 const ext = '<svg class="ls-icon ls-ext" aria-hidden="true"><use href="#i-external"/></svg><span class="sr-only"> (opens in a new tab)</span>';
 
+/** The strategies of bench/recall.mjs the website shows as tabs; the README's guess table also compares 'guessed-field'. */
+export const RECALL_TABS = ['known', 'guessed', 'fields', 'typing', 'default'];
+
 /**
- * The "Measured, not promised" section: R@5 per query language for each strategy of bench/recall.mjs, one tab per
+ * The "Measured, not promised" section: R@5 per query language for each strategy in RECALL_TABS, one tab per
  * strategy, languages sorted by R@5. Static markup, so the figures read right without JavaScript.
  */
 export function renderRecall(recall) {
   const strategy = id => recall.strategies.find(s => s.id === id);
-  const order = ['known', 'fields', 'typing', 'default'].map(strategy);
+  const order = RECALL_TABS.map(strategy);
   const codes = Object.keys(recall.languages);
   const tabs = order.map((s, i) => `<button class="tab-trigger" role="tab" aria-selected="${i === 0}" aria-controls="recall-panel-${s.id}" id="recall-tab-${s.id}"${i ? ' tabindex="-1"' : ''}>${escape(s.name)}</button>`);
   const panels = order.map((s, i) => {
@@ -122,6 +125,23 @@ export function renderRecallTable(recall) {
   ].join('\n');
 }
 
+/** The README's table for a guessed query language: mean R@1 and R@5 of searching all fields, the guessed field only,
+ * the language option and the known field. */
+export function renderGuessTable(recall) {
+  const rows = [['fields', 'Language unknown: all 20 fields'], ['guessed-field', 'Guessed language: only that field'],
+    ['guessed', 'Guessed language: `language`'], ['known', 'Known language: only that field']];
+  const { dataset, guessed } = recall;
+  return [
+    '<!-- language-guess:start -->',
+    `| tiny-embedding-bench-v1, ${dataset.questions.toLocaleString('en')} questions | R@1 | R@5 |`,
+    '| --- | ---: | ---: |',
+    ...rows.map(([id, label]) => { const s = recall.strategies.find(x => x.id === id); return `| ${label} | ${percent(s.r1, 1)} | ${percent(s.r5, 1)} |`; }),
+    '',
+    `${guessed.identifier} guessed ${guessed.correct.toLocaleString('en')} of the ${dataset.questions.toLocaleString('en')} questions' languages right.`,
+    '<!-- language-guess:end -->',
+  ].join('\n');
+}
+
 const METHODS = { Snowball: 'Snowball stemming', segmenter: 'Word segmentation', bigrams: 'Syllable bigrams', trigrams: 'Words plus trigrams', 'tone folding': 'Tone mark folding' };
 
 /** The README's languages-at-a-glance block: one row per kind of analysis, with the R@5 range of its languages. */
@@ -154,6 +174,7 @@ export async function writeRecall(recall) {
     ['docs/index.html', /<!-- recall:start -->[\s\S]*<!-- recall:end -->/, renderRecall],
     ['README.md', /<!-- recall-table:start -->[\s\S]*<!-- recall-table:end -->/, renderRecallTable],
     ['README.md', /<!-- languages:start -->[\s\S]*<!-- languages:end -->/, renderLanguageGlance],
+    ['README.md', /<!-- language-guess:start -->[\s\S]*<!-- language-guess:end -->/, renderGuessTable],
   ]) {
     const text = await readFile(join(root, file), 'utf8');
     if (!pattern.test(text)) throw new Error(`${file} lacks the generated recall markers`);

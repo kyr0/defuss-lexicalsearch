@@ -29,8 +29,9 @@ test('README examples run and print the output their comments state', async () =
 });
 
 test('the README R@5 figures match docs/data/recall.json, as the website does', async () => {
-  const { renderLanguageGlance, renderRecallTable } = await import('../scripts/docs.mjs');
+  const { renderGuessTable, renderLanguageGlance, renderRecallTable } = await import('../scripts/docs.mjs');
   const recall = JSON.parse(await readFile(new URL('docs/data/recall.json', root), 'utf8'));
   assert.ok(readme.includes(renderRecallTable(recall)), 'README.md recall table differs from docs/data/recall.json: run make docs');
   assert.ok(readme.includes(renderLanguageGlance(recall)), 'README.md languages at a glance differ from docs/data/recall.json: run make docs');
+  assert.ok(readme.includes(renderGuessTable(recall)), 'README.md guessed-language table differs from docs/data/recall.json: run make docs');
 });

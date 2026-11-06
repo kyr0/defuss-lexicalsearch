@@ -4,5 +4,5 @@ import { createAnalyzer, normalizeToken, segmentWords } from './analyzer';
  * VERIFIED: its tokens equal those of 0.2.0, and `segmented` changes query matching only, so 0.2.0 snapshots restore
  * under the unchanged id.
  */
-export const ja = createAnalyzer({ id: 'ja-intl-word-v1', tokenize: segmentWords('ja'), normalize: normalizeToken, segmented: true });
+export const ja = createAnalyzer({ id: 'ja-intl-word-v1', language: 'ja', tokenize: segmentWords('ja'), normalize: normalizeToken, segmented: true });
 export default ja;

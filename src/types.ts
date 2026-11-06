@@ -14,6 +14,9 @@ export interface Analyzer {
    * `operator: 'any'` the fragment then matches when one of its words occurs; otherwise all of them must occur.
    * VERIFIED: a per-analyzer flag, because one query can search fields of spaced and unspaced languages at once. */
   readonly segmented?: boolean;
+  /** ISO 639 code of the language this analyzer is made for, such as `de`; each language entry sets its own. A search's
+   * `language` option weighs the fields of this language higher. Analysis ignores it, so it needs no new id. */
+  readonly language?: string;
 }
 export interface FieldOptions {
   weight?: number;
@@ -78,6 +81,12 @@ export interface SearchOptions<M extends JsonValue = Record<string, JsonValue>> 
   explain?: boolean;
   /** Exclude matches of these queries using the same mode, fields, operator and expansion settings. */
   exclude?: readonly string[];
+  /** Language of the query as a BCP 47 tag (`de`, `de-CH`), such as a language identifier's guess. Fields whose analyzer
+   * has its primary language weigh `languageBoost` times more; all other fields still match, so a wrong guess costs
+   * little. A language without fields changes nothing. */
+  language?: string;
+  /** Weight factor for the fields of `language`, in [1, 1000000]. Default 3. */
+  languageBoost?: number;
 }
 export interface SearchStats {
   expandedTerms: number;

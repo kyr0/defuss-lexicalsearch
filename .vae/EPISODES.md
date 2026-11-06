@@ -59,3 +59,10 @@ Wrap: EVERY lead becomes a test | .vae/VERIFY.py rule | one MEMORY line with BC,
 2026-10-31T15:17:25Z s=4e5a9027 FINDING docs/index.html:124 hero pill, :923 install learn=none: visual detail checked by screenshot; site.mjs asserts the version text and link of each tag.
 2026-10-31T15:17:25Z s=4e5a9027 FINDING scripts/docs.mjs:renderLanguageGlance learn=none: simplification.
 2026-10-31T15:17:25Z s=4e5a9027 FINDING docs/index.html agent prompt learn=none: copy fix.
+2026-11-02T13:44:42Z s=b56c5c03 DONE fp=7990acfc00bb cov=75.6% paths=ARCH.md,CHANGELOG.md,README.md,docs/assets/lib/analyzer-CQNufUmw.js(+49)
+2026-11-02T13:44:42Z s=b56c5c03 FINDING scripts/e2e.mjs:smoke.mjs consumer learn=none: Coverage of a new option in e2e is a review judgment per change; no mechanical rule can tell which option is new.
+2026-11-06T11:42:51Z s=a22aa615 DONE fp=6f3976a2caaf cov=75.6% paths=ARCH.md,CHANGELOG.md,README.md,bench/recall.mjs(+57)
+2026-11-06T11:42:51Z s=a22aa615 FINDING README.md:145 (B01, B09); ARCH.md:17 learn=test: test/readme.test.mjs fails when the README guess table differs from docs/data/recall.json; scripts/site.mjs checks the website tabs against RECALL_TABS.
+2026-11-06T11:42:51Z s=a22aa615 FINDING src/engine.ts:245 weightOf learn=none: Review confirmation, no defect.
+2026-11-06T13:04:35Z s=a22aa615 DONE fp=f7de01ca4d87 cov=75.6% paths=ARCH.md,CHANGELOG.md,README.md,bench/recall.mjs(+57)
+2026-11-06T13:04:35Z s=a22aa615 FINDING package.json:3; CHANGELOG.md:3; docs/index.html version badges learn=none: Existing site.mjs and recall version checks cover it.

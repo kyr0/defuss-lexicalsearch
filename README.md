@@ -115,6 +115,61 @@ console.log(index.search('図書館はどこ', { fields: ['ja'], operator: 'all'
 
 The Russian analyzer stems `библиотеке` and `библиотека` to one term. Japanese, Chinese and Thai write words without spaces, so their analyzers are `segmented`: the words of one unspaced query fragment count as separate words, and under the default OR one of them suffices. `operator: 'all'` requires every word, and `どこ` occurs in no document. Without `fields`, a query searches every language field; that needs no language detection but matches shared words across languages, which costs recall: compare the Known language and Language fields columns of the table below.
 
+When the application can only guess the query's language, pass the guess as `language` instead of restricting `fields`. Each language entry names its language (`de.language` is `'de'`), and the fields of the guessed language weigh three times more, while every other field still matches, so a wrong guess costs little:
+
+```ts
+import { LexicalSearch } from 'defuss-lexicalsearch';
+import de from 'defuss-lexicalsearch/de';
+import en from 'defuss-lexicalsearch/en';
+
+const index = new LexicalSearch({ fields: { de: { analyzer: de }, en: { analyzer: en } } });
+index.addAll([
+  { id: 'de-1', fields: { de: 'Pinguine im Zoo' } },
+  { id: 'en-1', fields: { en: 'penguins at the zoo' } },
+]);
+
+console.log(index.search('zoo', { language: 'de' }).map(hit => hit.id)); // [ 'de-1', 'en-1' ]
+console.log(index.search('zoo', { language: 'en' }).map(hit => hit.id)); // [ 'en-1', 'de-1' ]
+console.log(index.search('Pinguine', { language: 'en' }).map(hit => hit.id)); // [ 'de-1' ]
+```
+
+A language identifier such as [defuss-lid](https://github.com/kyr0/defuss-lid) supplies the guess. This library does not depend on one, and its `major_20` pack covers the 20 language entries:
+
+```ts
+import { LexicalSearch } from 'defuss-lexicalsearch';
+import de from 'defuss-lexicalsearch/de';
+import en from 'defuss-lexicalsearch/en';
+import { load } from 'defuss-lid/packs/major_20';
+
+const index = new LexicalSearch({ fields: { de: { analyzer: de }, en: { analyzer: en } } });
+index.addAll([
+  { id: 'de-1', fields: { de: 'Pinguine im Zoo' } },
+  { id: 'en-1', fields: { en: 'penguins at the zoo' } },
+]);
+
+const lid = await load();
+const query = 'Wann öffnet der Zoo?';
+const language = lid.predict(query)[0]?.language;
+console.log(language); // de
+console.log(index.search(query, { language }).map(hit => hit.id)); // [ 'de-1', 'en-1' ]
+lid.dispose();
+```
+
+Why a boost instead of searching only the guessed field: identifiers misread short queries. VERIFIED (2026-11-06 probe, defuss-lid 0.5.0 `major_20`): among 44 authored queries over the 100 sample notes of [defuss-search](https://github.com/kyr0/defuss-search), it misread 6, such as `penguins` as French and `Zahnarzttermin` as Polish. Searching only the guessed field put a relevant note first for 18 of the 22 keyword queries; `language` did so for all 22. On tiny-embedding-bench-v1, `make bench` measures:
+
+<!-- language-guess:start -->
+| tiny-embedding-bench-v1, 1,000 questions | R@1 | R@5 |
+| --- | ---: | ---: |
+| Language unknown: all 20 fields | 80.6% | 92.2% |
+| Guessed language: only that field | 89.0% | 96.0% |
+| Guessed language: `language` | 89.0% | 96.4% |
+| Known language: only that field | 90.3% | 97.3% |
+
+defuss-lid 0.5.0 major_20 guessed 987 of the 1,000 questions' languages right.
+<!-- language-guess:end -->
+
+With the as-you-type options (`prefix`, `substring`, `fuzzy`, `transpositions`), the same four rows read 65.7%, 87.1%, 86.4% and 88.4% R@1 (2026-11-06 probe). The factor trades matches in other languages against the guessed one. On the 91 sample notes that search for their own translations, BM25 put a translation first for 20 over all fields, 13 with `languageBoost: 2`, 12 with the default 3 and 9 with 4. As you type on tiny-embedding-bench-v1, the same factors reached 84.7%, 86.4% and 87.0% R@1.
+
 ### Search API symbols and identifiers
 
 `apiSearchPreset` keeps each symbol as a raw keyword and also splits it into code words, so an exact symbol and its parts are both searchable:
@@ -256,6 +311,7 @@ The library API is synchronous, so a large index on a browser's main thread bloc
 | `{ fuzzy: 1, transpositions: true }` | At most one edit, an adjacent swap counting as one |
 | `{ prefix: true, fuzzy: true }` | Also completes the last token despite typos: `Kül` finds `Kühlschrank` |
 | `{ exclude: ['deprecated'] }` | Removes the matches of these queries before pagination |
+| `{ language: 'de' }` | Fields whose analyzer has this language weigh `languageBoost` (default 3) times more; other fields still match |
 | `{ mode: 'exact' }` | Equality with the whole original field; no tokenizer, no query syntax |
 | `{ mode: 'prefix' }`, `'suffix'`, `'substring'` | Literal string relation with the original field contents |
 
@@ -312,9 +368,9 @@ Alternatives of one analyzed query token in one field contribute once, with thei
 
 The analyzers for `ru`, `it`, `pt`, `nl`, `pl`, `id`, `ar`, `hi`, `tr`, `ko`, `bn`, `ur` and `vi` remove soft hyphens and zero-width (non-)joiners inside words before splitting text, so `perpus\u00ADtakaan` stays one word. N-gram analyzers split only words in their own script and keep, for example, a Latin name whole.
 
-`createAnalyzer({ id, tokenize, normalize?, stem?, stopWords?, phonetic?, kind?, segmented? })` builds a custom analyzer; without `normalize`, it applies NFKC and lowercase. A `kind: 'keyword'` tokenizer must return the whole nonempty input as one token, and intentional changes belong in `normalize`. With `segmented: true`, the tokens of one whitespace-delimited query fragment count as separate words: under `operator: 'any'` the fragment matches when one of them occurs, while `operator: 'all'` and quoted phrases still require all of them. Give the analyzer a new versioned ID whenever its behavior changes: an index rejects two different definitions under one ID, and a snapshot cannot check that a supplied function still matches the behavior its ID had when the snapshot was written.
+`createAnalyzer({ id, tokenize, normalize?, stem?, stopWords?, phonetic?, kind?, segmented?, language? })` builds a custom analyzer; without `normalize`, it applies NFKC and lowercase. `language` is a lowercase ISO 639 code such as `sv`, which the search option `language` matches by the primary subtag of its tag (`sv-FI` boosts `sv` fields). A `kind: 'keyword'` tokenizer must return the whole nonempty input as one token, and intentional changes belong in `normalize`. With `segmented: true`, the tokens of one whitespace-delimited query fragment count as separate words: under `operator: 'any'` the fragment matches when one of them occurs, while `operator: 'all'` and quoted phrases still require all of them. Give the analyzer a new versioned ID whenever its behavior changes: an index rejects two different definitions under one ID, and a snapshot cannot check that a supplied function still matches the behavior its ID had when the snapshot was written.
 
-Stopwords keep their positions for phrases but are left out of the free-query requirements. Language analyzers are explicit imports; the library never guesses a language. The stemmers (`stem_en` to `stem_tr`) and phonetic encoders are exported separately from `defuss-lexicalsearch/stem` and `defuss-lexicalsearch/phonetic`.
+Stopwords keep their positions for phrases but are left out of the free-query requirements. Language analyzers are explicit imports; the library never guesses a language, the caller passes `language`. The stemmers (`stem_en` to `stem_tr`) and phonetic encoders are exported separately from `defuss-lexicalsearch/stem` and `defuss-lexicalsearch/phonetic`.
 
 ### Retrieval quality by language
 

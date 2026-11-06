@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
-import { percent, renderRecall } from './docs.mjs';
+import { percent, RECALL_TABS, renderRecall } from './docs.mjs';
 import { serve } from './server.mjs';
 
 // Drives the website in Chromium the way a visitor would: every section, every demo control, both tabs, the palette,
@@ -141,7 +141,7 @@ export async function runSite({ output }) {
 
     await check('recall per language: every strategy tab shows its figures', async () => {
       const ids = await page.locator('#recall-tabs [role="tab"]').evaluateAll(tabs => tabs.map(tab => tab.id.replace('recall-tab-', '')));
-      assert.deepEqual([...ids].sort(), recall.strategies.map(s => s.id).sort());
+      assert.deepEqual(ids, RECALL_TABS);
       for (const id of [...ids].reverse()) {
         const strategy = recall.strategies.find(s => s.id === id);
         await page.click(`#recall-tab-${id}`);

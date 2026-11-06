@@ -1,4 +1,4 @@
-import { c as createAnalyzer, t as tokenizeJoined, n as normalizeToken } from './analyzer-lEIu_Jj9.js';
+import { c as createAnalyzer, t as tokenizeJoined, n as normalizeToken } from './analyzer-CQNufUmw.js';
 import { s as stem_ru } from './ru-CV02fQgA.js';
 import './snowball-COqm-oKm.js';
 
@@ -166,6 +166,7 @@ const DEFAULT_STOPWORDS_RU = [
 
 const ru = createAnalyzer({
   id: "ru-lexicalsearch-v1",
+  language: "ru",
   tokenize: tokenizeJoined,
   normalize: (token) => normalizeToken(token).normalize("NFD").replace(/[\u0300\u0301]/g, "").normalize("NFC"),
   stem: stem_ru,

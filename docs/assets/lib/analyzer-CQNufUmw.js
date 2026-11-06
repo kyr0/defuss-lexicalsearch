@@ -10,12 +10,22 @@ const codeAnalyzer = Object.freeze({
   tokenize: (text) => tokenize(text.replace(new RegExp("(\\p{Lu})(\\p{Lu}\\p{Ll})", "gu"), "$1 $2").replace(new RegExp("([\\p{Ll}\\p{N}])(\\p{Lu})", "gu"), "$1 $2")),
   normalize: normalizeToken
 });
+function primaryLanguage(tag) {
+  try {
+    return new Intl.Locale(tag).language;
+  } catch {
+    throw new RangeError(`Invalid BCP 47 language tag: ${String(tag)}`);
+  }
+}
 function createAnalyzer(config) {
   if (!config || typeof config.id !== "string" || !config.id || typeof config.tokenize !== "function") {
     throw new TypeError("Analyzer requires a nonempty versioned id and tokenizer");
   }
   if (config.kind !== void 0 && !["text", "keyword"].includes(config.kind)) throw new TypeError("Invalid analyzer kind");
   if (config.segmented !== void 0 && typeof config.segmented !== "boolean") throw new TypeError("segmented must be boolean");
+  if (config.language !== void 0 && (typeof config.language !== "string" || primaryLanguage(config.language) !== config.language)) {
+    throw new TypeError("language must be a canonical lowercase ISO 639 code such as de");
+  }
   for (const fn of [config.normalize, config.stem, config.phonetic]) {
     if (fn !== void 0 && typeof fn !== "function") throw new TypeError("Invalid analyzer function");
   }
@@ -77,4 +87,4 @@ function wordGrams(n, keepWord, script, words = tokenizeJoined) {
   });
 }
 
-export { tokenize as a, analyze as b, createAnalyzer as c, builtinAnalyzers as d, codeAnalyzer as e, accentFoldedAnalyzer as f, foldedKeywordAnalyzer as g, whitespaceAnalyzer as h, keywordAnalyzer as k, normalizeToken as n, segmentWords as s, tokenizeJoined as t, unicodeAnalyzer as u, wordGrams as w };
+export { tokenize as a, analyze as b, createAnalyzer as c, builtinAnalyzers as d, codeAnalyzer as e, accentFoldedAnalyzer as f, foldedKeywordAnalyzer as g, whitespaceAnalyzer as h, keywordAnalyzer as k, normalizeToken as n, primaryLanguage as p, segmentWords as s, tokenizeJoined as t, unicodeAnalyzer as u, wordGrams as w };

@@ -9,6 +9,6 @@ const foldUrdu = (text: string): string => text.normalize('NFKC')
  * VERIFIED: snapshots persist the id and fromJSON resolves analyzers by it; change it when behavior changes.
  */
 export const ur = createAnalyzer({
-  id: 'ur-trigram-v1', tokenize: wordGrams(3, true, /\p{Script=Arabic}/u, text => tokenizeJoined(foldUrdu(text))), normalize: normalizeToken, segmented: true,
+  id: 'ur-trigram-v1', language: 'ur', tokenize: wordGrams(3, true, /\p{Script=Arabic}/u, text => tokenizeJoined(foldUrdu(text))), normalize: normalizeToken, segmented: true,
 });
 export default ur;

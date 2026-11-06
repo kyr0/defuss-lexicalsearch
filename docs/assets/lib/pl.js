@@ -1,9 +1,10 @@
-import { c as createAnalyzer, n as normalizeToken, t as tokenizeJoined } from './analyzer-lEIu_Jj9.js';
+import { c as createAnalyzer, n as normalizeToken, t as tokenizeJoined } from './analyzer-CQNufUmw.js';
 import { s as stem_pl } from './pl-CZDKKmWr.js';
 import './snowball-COqm-oKm.js';
 
 const pl = createAnalyzer({
   id: "pl-lexicalsearch-v1",
+  language: "pl",
   tokenize: tokenizeJoined,
   normalize: normalizeToken,
   stem: stem_pl

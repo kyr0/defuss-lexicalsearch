@@ -1,4 +1,4 @@
-import { c as createAnalyzer, n as normalizeToken, a as tokenize } from './analyzer-lEIu_Jj9.js';
+import { c as createAnalyzer, n as normalizeToken, a as tokenize } from './analyzer-CQNufUmw.js';
 import { s as stem_de } from './de-6WpbAnI9.js';
 import { k as koelnerPhonetik } from './de-B3__hU4P.js';
 import './stemmer-CH2wT9oZ.js';
@@ -240,6 +240,7 @@ const DEFAULT_STOPWORDS_DE = [
 
 const de = createAnalyzer({
   id: "de-lexicalsearch-v1",
+  language: "de",
   tokenize,
   normalize: normalizeToken,
   stem: stem_de,

@@ -4,11 +4,14 @@ import { arch, cpus, platform } from 'node:os';
 import { join } from 'node:path';
 import { performance } from 'node:perf_hooks';
 import { fileURLToPath } from 'node:url';
+import { load as loadLanguageIdentifier } from 'defuss-lid/packs/major_20';
 
 // Retrieval quality per query language on tiny-embedding-bench-v1, the benchmark defuss-vectorsearch reports:
 // 100 Belebele passages and 50 questions, each in 20 languages, one gold passage per question. All 2,000 passages form
 // one index, so a question also competes with the 19 translations of its gold passage; the target is the gold passage
 // in the question's language. R@k is the share of a language's 50 questions whose target ranks within the top k.
+// The guessed-language strategies take each question's language from defuss-lid's major_20 pack, which covers the same
+// 20 languages, so they measure what an application gets when it has to guess.
 // Writes output/bench/recall.json; `--site` also writes docs/data/recall.json, which the website renders.
 const root = fileURLToPath(new URL('../', import.meta.url));
 const dist = process.argv.find(arg => arg.startsWith('--dist='))?.slice(7) ?? join(root, 'dist');
@@ -50,6 +53,10 @@ export const STRATEGIES = [
     description: 'One field per language with its analyzer; a question searches all 20 fields, so its language need not be known.' },
   { id: 'known', name: 'Known language', perLanguage: true, own: true, options: {},
     description: "One field per language with its analyzer; a question searches its own language's field." },
+  { id: 'guessed', name: 'Guessed language', perLanguage: true, guess: 'boost', options: {},
+    description: "One field per language with its analyzer; a question searches all 20 fields with the language defuss-lid guesses as the language option, which weighs that language's field three times more." },
+  { id: 'guessed-field', name: 'Guessed field only', perLanguage: true, guess: 'field', options: {},
+    description: "One field per language with its analyzer; a question searches only the field of the language defuss-lid guesses." },
   { id: 'typing', name: 'As you type', perLanguage: true, own: true, options: { prefix: true, substring: true, fuzzy: true, transpositions: true },
     description: "Known language plus the website demo's defaults: completion, inside-word matching and typo tolerance." },
 ];
@@ -84,6 +91,16 @@ export async function measureRecall() {
   const gold = new Map(data.qrels.map(([query, passage]) => [query, groups.get(passage)]));
   const passages = data.corpus.flatMap((passage, group) => passage.text.map((text, language) => ({ id: `${group}:${language}`, text, language })));
   const questions = data.queries.flatMap(query => query.text.map((text, language) => ({ text, language, target: `${gold.get(query.id)}:${language}` })));
+  // One guess per question, made once: the identifier's time is not part of the search time below.
+  const identifier = await loadLanguageIdentifier();
+  const guesses = questions.map(({ text }) => identifier.predict(text)[0]?.language);
+  identifier.dispose();
+  const fieldOf = Object.fromEntries(languages.map(code => [LANGUAGES[code].entry, code]));
+  const { version: lidVersion } = JSON.parse(await readFile(fileURLToPath(import.meta.resolve('defuss-lid/package.json')), 'utf8'));
+  const guessed = { identifier: `defuss-lid ${lidVersion} major_20`, correct: guesses.filter((guess, i) => guess === LANGUAGES[languages[questions[i].language]].entry).length };
+  const route = (strategy, language, guess) => strategy.own ? { fields: [languages[language]] }
+    : strategy.guess === 'boost' ? { language: guess }
+    : strategy.guess === 'field' && fieldOf[guess] ? { fields: [fieldOf[guess]] } : {};
 
   const strategies = [];
   for (const strategy of STRATEGIES) {
@@ -95,8 +112,8 @@ export async function measureRecall() {
     const indexMs = performance.now() - start;
     const hits = languages.map(() => K.map(() => 0));
     start = performance.now();
-    for (const { text, language, target } of questions) {
-      const ranked = index.search(text, { ...strategy.options, limit: Math.max(...K), ...(strategy.own ? { fields: [languages[language]] } : {}) });
+    for (const [i, { text, language, target }] of questions.entries()) {
+      const ranked = index.search(text, { ...strategy.options, limit: Math.max(...K), ...route(strategy, language, guesses[i]) });
       const rank = ranked.findIndex(hit => hit.id === target) + 1;
       K.forEach((k, i) => { if (rank > 0 && rank <= k) hits[language][i]++; });
     }
@@ -110,7 +127,7 @@ export async function measureRecall() {
   return {
     version, dataset: { name: data.name, url: DATASET_URL, sha256: DATASET_SHA256, passages: passages.length, questions: questions.length, perLanguage: data.queries.length },
     node: process.version, icu: process.versions.icu, platform: `${platform()} ${arch()}`, cpu: cpus()[0]?.model,
-    languages: Object.fromEntries(languages.map(code => [code, LANGUAGES[code]])), strategies,
+    languages: Object.fromEntries(languages.map(code => [code, LANGUAGES[code]])), guessed, strategies,
   };
 }
 
@@ -119,10 +136,10 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   await mkdir(join(root, 'output/bench'), { recursive: true });
   await writeFile(join(root, 'output/bench/recall.json'), `${JSON.stringify(report, null, 2)}\n`);
   if (process.argv.includes('--site')) {
-    // The website shows R@5 only; timings vary by machine and stay out of the committed file.
+    // The website shows R@5 per language, the README also mean R@1; timings vary by machine and stay out of the file.
     const site = {
-      version: report.version, dataset: report.dataset, node: report.node, icu: report.icu, languages: report.languages,
-      strategies: report.strategies.map(({ id, name, description, mean, languages }) => ({ id, name, description, r5: mean.r5,
+      version: report.version, dataset: report.dataset, node: report.node, icu: report.icu, languages: report.languages, guessed: report.guessed,
+      strategies: report.strategies.map(({ id, name, description, mean, languages }) => ({ id, name, description, r1: mean.r1, r5: mean.r5,
         languages: Object.fromEntries(Object.entries(languages).map(([code, recall]) => [code, recall.r5])) })),
     };
     await writeFile(join(root, 'docs/data/recall.json'), `${JSON.stringify(site, null, 2)}\n`);

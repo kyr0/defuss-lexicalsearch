@@ -28,6 +28,6 @@ export function foldVietnameseTone(syllable: string): string {
  * VERIFIED: snapshots persist the id and fromJSON resolves analyzers by it; change it when behavior changes.
  */
 export const vi = createAnalyzer({
-  id: 'vi-lexicalsearch-v1', tokenize: tokenizeJoined, normalize: (token: string) => foldVietnameseTone(normalizeToken(token)),
+  id: 'vi-lexicalsearch-v1', language: 'vi', tokenize: tokenizeJoined, normalize: (token: string) => foldVietnameseTone(normalizeToken(token)),
 });
 export default vi;

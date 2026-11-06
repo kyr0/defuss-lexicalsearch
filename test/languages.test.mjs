@@ -111,3 +111,35 @@ test('createAnalyzer validates segmented, and one id cannot name two segmentatio
   const b = createAnalyzer({ ...a, segmented: true });
   assert.throws(() => new LexicalSearch({ fields: { one: { analyzer: a }, two: { analyzer: b } } }), /Conflicting/);
 });
+
+test('every language entry names its language', () => {
+  for (const code of ENTRIES) assert.equal(analyzers[code].language, code);
+});
+
+test('language weighs the fields of that language higher and keeps every other match', () => {
+  const index = new LexicalSearch({ fields: { de: { analyzer: analyzers.de }, en: { analyzer: analyzers.en } } });
+  index.addAll([{ id: 'de', fields: { de: 'Pinguine im Zoo' } }, { id: 'en', fields: { en: 'penguins at the zoo' } }]);
+  const plain = Object.fromEntries(index.search('zoo').map(hit => [hit.id, hit.score]));
+  const de = index.search('zoo', { language: 'de-CH' });
+  assert.deepEqual(ids(de), ['de', 'en']);
+  assert.equal(de[0].score, 3 * plain.de);
+  assert.equal(de[1].score, plain.en);
+  assert.deepEqual(ids(index.search('zoo', { language: 'en' })), ['en', 'de']);
+  assert.equal(index.search('zoo', { language: 'de', languageBoost: 1 })[0].score, plain.de);
+  // A wrong guess still finds the other language's document; a language without fields changes nothing.
+  assert.deepEqual(ids(index.search('Pinguine', { language: 'en' })), ['de']);
+  assert.deepEqual(index.search('zoo', { language: 'sv' }), index.search('zoo'));
+  assert.deepEqual(LexicalSearch.fromJSON(index.serialize(), { [analyzers.de.id]: analyzers.de, [analyzers.en.id]: analyzers.en })
+    .search('zoo', { language: 'en' }), index.search('zoo', { language: 'en' }));
+  assert.equal(index.search('Pinguine im Zoo', { mode: 'exact', language: 'de' })[0].score, 3);
+});
+
+test('language and languageBoost are validated', () => {
+  const index = indexOf(analyzers.de, { a: 'Zoo' });
+  assert.throws(() => index.search('zoo', { language: 'not a tag' }), RangeError);
+  assert.throws(() => index.search('zoo', { language: 7 }), TypeError);
+  for (const languageBoost of [0.5, Infinity, '3']) assert.throws(() => index.search('zoo', { language: 'de', languageBoost }), RangeError);
+  assert.throws(() => createAnalyzer({ id: 'x-v1', tokenize: text => [text], language: 'DE' }), /language/);
+  const a = createAnalyzer({ id: 'same-v1', tokenize: text => text.split(' '), language: 'de' });
+  assert.throws(() => new LexicalSearch({ fields: { one: { analyzer: a }, two: { analyzer: { ...a, language: 'en' } } } }), /Conflicting/);
+});

@@ -15,6 +15,7 @@ index.add({ id: 1, fields: { title: 'bad' } });
 index.add({ id: 'b', fields: {}, metadata: { category: 1 } });
 // @ts-expect-error Edit distance is explicitly bounded.
 index.search('hello', { fuzzy: 3 });
+index.search('haus', { language: 'de-CH', languageBoost: 2 });
 
 const api = new LexicalSearch<{ category: string }>(apiSearchPreset);
 const symbol: LexicalDocument<{category:string}> = { id:'cpp', fields:{symbol:'C++',description:'language'},metadata:{category:'language'} };

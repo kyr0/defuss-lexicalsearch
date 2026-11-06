@@ -80,7 +80,7 @@
           <span class="swap-on"><svg class="ls-icon" aria-hidden="true"><use href="#i-moon"/></svg></span>
           <span class="swap-off"><svg class="ls-icon" aria-hidden="true"><use href="#i-sun"/></svg></span>
         </label>
-        <a class="btn mk-header-wide ls-npm-tag" data-variant="outline" data-size="sm" href="https://www.npmjs.com/package/defuss-lexicalsearch" target="_blank" rel="noopener"><svg class="ls-icon" aria-hidden="true"><use href="#i-package"/></svg>npm <span class="badge" data-variant="secondary" data-size="xs" id="header-version">v0.3.0</span><span class="sr-only"> (opens in a new tab)</span></a>
+        <a class="btn mk-header-wide ls-npm-tag" data-variant="outline" data-size="sm" href="https://www.npmjs.com/package/defuss-lexicalsearch" target="_blank" rel="noopener"><svg class="ls-icon" aria-hidden="true"><use href="#i-package"/></svg>npm <span class="badge" data-variant="secondary" data-size="xs" id="header-version">v0.4.0</span><span class="sr-only"> (opens in a new tab)</span></a>
         <a class="btn mk-header-wide" data-variant="ghost" data-size="icon" href="https://github.com/kyr0/defuss-lexicalsearch" aria-label="defuss-lexicalsearch on GitHub"><svg class="ls-icon" aria-hidden="true"><use href="#i-github"/></svg></a>
         <button type="button" class="btn mk-header-menu" data-variant="ghost" data-size="icon" data-sheet-trigger="ls-menu" aria-haspopup="dialog" aria-label="Open menu"><svg class="ls-icon" aria-hidden="true"><use href="#i-menu"/></svg></button>
       </div>
@@ -102,7 +102,7 @@
         </div>
         <div class="sheet-footer mk-header-sheet-actions">
           <a class="btn" data-variant="outline" href="https://github.com/kyr0/defuss-lexicalsearch"><svg class="ls-icon" aria-hidden="true"><use href="#i-github"/></svg>GitHub</a>
-          <a class="btn" data-variant="outline" href="https://www.npmjs.com/package/defuss-lexicalsearch"><svg class="ls-icon" aria-hidden="true"><use href="#i-package"/></svg>npm <span class="badge" data-variant="secondary" data-size="xs" id="menu-version">v0.3.0</span></a>
+          <a class="btn" data-variant="outline" href="https://www.npmjs.com/package/defuss-lexicalsearch"><svg class="ls-icon" aria-hidden="true"><use href="#i-package"/></svg>npm <span class="badge" data-variant="secondary" data-size="xs" id="menu-version">v0.4.0</span></a>
         </div>
       </div>
     </dialog>
@@ -121,7 +121,7 @@
     <div class="parallax-content">
       <section class="mk-hero" style="width:100%">
         <div class="mk-hero-copy">
-          <div class="mk-hero-pill ls-hero-pill"><a class="badge" data-variant="default" data-size="sm" href="https://www.npmjs.com/package/defuss-lexicalsearch" target="_blank" rel="noopener">npm&nbsp;<span id="hero-version">v0.3.0</span><span class="sr-only"> (opens in a new tab)</span></a><a href="#demo">No server, no API key, nothing leaves your browser <svg class="ls-icon" aria-hidden="true"><use href="#i-arrow"/></svg></a></div>
+          <div class="mk-hero-pill ls-hero-pill"><a class="badge" data-variant="default" data-size="sm" href="https://www.npmjs.com/package/defuss-lexicalsearch" target="_blank" rel="noopener">npm&nbsp;<span id="hero-version">v0.4.0</span><span class="sr-only"> (opens in a new tab)</span></a><a href="#demo">No server, no API key, nothing leaves your browser <svg class="ls-icon" aria-hidden="true"><use href="#i-arrow"/></svg></a></div>
           <h1 class="mk-hero-title"><strong>Lexical</strong> search that finds the <i>exact</i> word, symbol or phrase</h1>
           <p class="ls-flip"><span class="text-rotate"><span>
               <span class="ls-accent">with BM25 relevance ranking</span>
@@ -523,7 +523,7 @@
         <div class="mk-stats-copy">
           <div class="mk-stats-head">
             <h2 class="mk-stats-title" id="recall-title">Measured, not promised<sup class="ls-footnote-mark">*</sup></h2>
-            <p class="mk-stats-desc">Each of the 2,000 passages of <a href="https://github.com/kyr0/tiny-embedding-bench/tree/main/datasets/tiny-embedding-bench-v1" target="_blank" rel="noopener">tiny-embedding-bench-v1<svg class="ls-icon ls-ext" aria-hidden="true"><use href="#i-external"/></svg><span class="sr-only"> (opens in a new tab)</span></a> is indexed once, 1,000 questions in 20 languages search them, and a question scores when its gold passage, in the question's language, ranks in the top 5. The same haystack measures <a href="https://github.com/kyr0/defuss-vectorsearch" target="_blank" rel="noopener">defuss-vectorsearch<svg class="ls-icon ls-ext" aria-hidden="true"><use href="#i-external"/></svg><span class="sr-only"> (opens in a new tab)</span></a>, so a question also competes with the 19 translations of its gold passage. From <code>make bench</code>, version 0.3.0.</p>
+            <p class="mk-stats-desc">Each of the 2,000 passages of <a href="https://github.com/kyr0/tiny-embedding-bench/tree/main/datasets/tiny-embedding-bench-v1" target="_blank" rel="noopener">tiny-embedding-bench-v1<svg class="ls-icon ls-ext" aria-hidden="true"><use href="#i-external"/></svg><span class="sr-only"> (opens in a new tab)</span></a> is indexed once, 1,000 questions in 20 languages search them, and a question scores when its gold passage, in the question's language, ranks in the top 5. The same haystack measures <a href="https://github.com/kyr0/defuss-vectorsearch" target="_blank" rel="noopener">defuss-vectorsearch<svg class="ls-icon ls-ext" aria-hidden="true"><use href="#i-external"/></svg><span class="sr-only"> (opens in a new tab)</span></a>, so a question also competes with the 19 translations of its gold passage. From <code>make bench</code>, version 0.4.0.</p>
           </div>
           <div class="mk-stats-grid">
             <div class="mk-stat" data-recall-stat="known"><span class="mk-stat-value">97.3%</span><span class="mk-stat-label">mean R@5 over 20 languages when the question's language is known</span></div>
@@ -538,6 +538,7 @@
           <div class="card-content tabs ls-recall-tabs">
             <div class="tab-list" role="tablist" aria-label="Search strategy" id="recall-tabs">
               <button class="tab-trigger" role="tab" aria-selected="true" aria-controls="recall-panel-known" id="recall-tab-known">Known language</button>
+              <button class="tab-trigger" role="tab" aria-selected="false" aria-controls="recall-panel-guessed" id="recall-tab-guessed" tabindex="-1">Guessed language</button>
               <button class="tab-trigger" role="tab" aria-selected="false" aria-controls="recall-panel-fields" id="recall-tab-fields" tabindex="-1">Language fields</button>
               <button class="tab-trigger" role="tab" aria-selected="false" aria-controls="recall-panel-typing" id="recall-tab-typing" tabindex="-1">As you type</button>
               <button class="tab-trigger" role="tab" aria-selected="false" aria-controls="recall-panel-default" id="recall-tab-default" tabindex="-1">Default analyzer</button>
@@ -624,6 +625,91 @@
               <div class="progress-field" data-recall="hin_Deva">
                 <div class="progress-header"><span class="progress-label" id="r5-known-hin_Deva">Hindi <span class="badge" data-variant="outline" data-size="xs">Snowball</span></span><output class="progress-value" for="r5-bar-known-hin_Deva">86%</output></div>
                 <progress class="progress" id="r5-bar-known-hin_Deva" data-size="xs" data-tone="auto" value="86" max="100" aria-labelledby="r5-known-hin_Deva"></progress>
+              </div>
+            </div>
+          </div>
+          <div class="tab-content" role="tabpanel" id="recall-panel-guessed" aria-labelledby="recall-tab-guessed" tabindex="0" hidden>
+            <p class="ls-recall-note">One field per language with its analyzer; a question searches all 20 fields with the language defuss-lid guesses as the language option, which weighs that language's field three times more. Mean R@5: <strong data-recall-mean="guessed">96.4%</strong>.</p>
+            <div class="ls-recall-list">
+              <div class="progress-field" data-recall="rus_Cyrl">
+                <div class="progress-header"><span class="progress-label" id="r5-guessed-rus_Cyrl">Russian <span class="badge" data-variant="outline" data-size="xs">Snowball</span></span><output class="progress-value" for="r5-bar-guessed-rus_Cyrl">100%</output></div>
+                <progress class="progress" id="r5-bar-guessed-rus_Cyrl" data-size="xs" data-tone="auto" value="100" max="100" aria-labelledby="r5-guessed-rus_Cyrl"></progress>
+              </div>
+              <div class="progress-field" data-recall="urd_Arab">
+                <div class="progress-header"><span class="progress-label" id="r5-guessed-urd_Arab">Urdu <span class="badge" data-variant="outline" data-size="xs">trigrams</span></span><output class="progress-value" for="r5-bar-guessed-urd_Arab">100%</output></div>
+                <progress class="progress" id="r5-bar-guessed-urd_Arab" data-size="xs" data-tone="auto" value="100" max="100" aria-labelledby="r5-guessed-urd_Arab"></progress>
+              </div>
+              <div class="progress-field" data-recall="jpn_Jpan">
+                <div class="progress-header"><span class="progress-label" id="r5-guessed-jpn_Jpan">Japanese <span class="badge" data-variant="outline" data-size="xs">segmenter</span></span><output class="progress-value" for="r5-bar-guessed-jpn_Jpan">100%</output></div>
+                <progress class="progress" id="r5-bar-guessed-jpn_Jpan" data-size="xs" data-tone="auto" value="100" max="100" aria-labelledby="r5-guessed-jpn_Jpan"></progress>
+              </div>
+              <div class="progress-field" data-recall="eng_Latn">
+                <div class="progress-header"><span class="progress-label" id="r5-guessed-eng_Latn">English <span class="badge" data-variant="outline" data-size="xs">Snowball</span></span><output class="progress-value" for="r5-bar-guessed-eng_Latn">98%</output></div>
+                <progress class="progress" id="r5-bar-guessed-eng_Latn" data-size="xs" data-tone="auto" value="98" max="100" aria-labelledby="r5-guessed-eng_Latn"></progress>
+              </div>
+              <div class="progress-field" data-recall="spa_Latn">
+                <div class="progress-header"><span class="progress-label" id="r5-guessed-spa_Latn">Spanish <span class="badge" data-variant="outline" data-size="xs">Snowball</span></span><output class="progress-value" for="r5-bar-guessed-spa_Latn">98%</output></div>
+                <progress class="progress" id="r5-bar-guessed-spa_Latn" data-size="xs" data-tone="auto" value="98" max="100" aria-labelledby="r5-guessed-spa_Latn"></progress>
+              </div>
+              <div class="progress-field" data-recall="por_Latn">
+                <div class="progress-header"><span class="progress-label" id="r5-guessed-por_Latn">Portuguese <span class="badge" data-variant="outline" data-size="xs">Snowball</span></span><output class="progress-value" for="r5-bar-guessed-por_Latn">98%</output></div>
+                <progress class="progress" id="r5-bar-guessed-por_Latn" data-size="xs" data-tone="auto" value="98" max="100" aria-labelledby="r5-guessed-por_Latn"></progress>
+              </div>
+              <div class="progress-field" data-recall="nld_Latn">
+                <div class="progress-header"><span class="progress-label" id="r5-guessed-nld_Latn">Dutch <span class="badge" data-variant="outline" data-size="xs">Snowball</span></span><output class="progress-value" for="r5-bar-guessed-nld_Latn">98%</output></div>
+                <progress class="progress" id="r5-bar-guessed-nld_Latn" data-size="xs" data-tone="auto" value="98" max="100" aria-labelledby="r5-guessed-nld_Latn"></progress>
+              </div>
+              <div class="progress-field" data-recall="vie_Latn">
+                <div class="progress-header"><span class="progress-label" id="r5-guessed-vie_Latn">Vietnamese <span class="badge" data-variant="outline" data-size="xs">tone folding</span></span><output class="progress-value" for="r5-bar-guessed-vie_Latn">98%</output></div>
+                <progress class="progress" id="r5-bar-guessed-vie_Latn" data-size="xs" data-tone="auto" value="98" max="100" aria-labelledby="r5-guessed-vie_Latn"></progress>
+              </div>
+              <div class="progress-field" data-recall="tha_Thai">
+                <div class="progress-header"><span class="progress-label" id="r5-guessed-tha_Thai">Thai <span class="badge" data-variant="outline" data-size="xs">segmenter</span></span><output class="progress-value" for="r5-bar-guessed-tha_Thai">98%</output></div>
+                <progress class="progress" id="r5-bar-guessed-tha_Thai" data-size="xs" data-tone="auto" value="98" max="100" aria-labelledby="r5-guessed-tha_Thai"></progress>
+              </div>
+              <div class="progress-field" data-recall="zho_Hans">
+                <div class="progress-header"><span class="progress-label" id="r5-guessed-zho_Hans">Chinese <span class="badge" data-variant="outline" data-size="xs">segmenter</span></span><output class="progress-value" for="r5-bar-guessed-zho_Hans">98%</output></div>
+                <progress class="progress" id="r5-bar-guessed-zho_Hans" data-size="xs" data-tone="auto" value="98" max="100" aria-labelledby="r5-guessed-zho_Hans"></progress>
+              </div>
+              <div class="progress-field" data-recall="deu_Latn">
+                <div class="progress-header"><span class="progress-label" id="r5-guessed-deu_Latn">German <span class="badge" data-variant="outline" data-size="xs">Snowball</span></span><output class="progress-value" for="r5-bar-guessed-deu_Latn">96%</output></div>
+                <progress class="progress" id="r5-bar-guessed-deu_Latn" data-size="xs" data-tone="auto" value="96" max="100" aria-labelledby="r5-guessed-deu_Latn"></progress>
+              </div>
+              <div class="progress-field" data-recall="fra_Latn">
+                <div class="progress-header"><span class="progress-label" id="r5-guessed-fra_Latn">French <span class="badge" data-variant="outline" data-size="xs">Snowball</span></span><output class="progress-value" for="r5-bar-guessed-fra_Latn">96%</output></div>
+                <progress class="progress" id="r5-bar-guessed-fra_Latn" data-size="xs" data-tone="auto" value="96" max="100" aria-labelledby="r5-guessed-fra_Latn"></progress>
+              </div>
+              <div class="progress-field" data-recall="ita_Latn">
+                <div class="progress-header"><span class="progress-label" id="r5-guessed-ita_Latn">Italian <span class="badge" data-variant="outline" data-size="xs">Snowball</span></span><output class="progress-value" for="r5-bar-guessed-ita_Latn">96%</output></div>
+                <progress class="progress" id="r5-bar-guessed-ita_Latn" data-size="xs" data-tone="auto" value="96" max="100" aria-labelledby="r5-guessed-ita_Latn"></progress>
+              </div>
+              <div class="progress-field" data-recall="pol_Latn">
+                <div class="progress-header"><span class="progress-label" id="r5-guessed-pol_Latn">Polish <span class="badge" data-variant="outline" data-size="xs">Snowball</span></span><output class="progress-value" for="r5-bar-guessed-pol_Latn">96%</output></div>
+                <progress class="progress" id="r5-bar-guessed-pol_Latn" data-size="xs" data-tone="auto" value="96" max="100" aria-labelledby="r5-guessed-pol_Latn"></progress>
+              </div>
+              <div class="progress-field" data-recall="arb_Arab">
+                <div class="progress-header"><span class="progress-label" id="r5-guessed-arb_Arab">Arabic <span class="badge" data-variant="outline" data-size="xs">Snowball</span></span><output class="progress-value" for="r5-bar-guessed-arb_Arab">96%</output></div>
+                <progress class="progress" id="r5-bar-guessed-arb_Arab" data-size="xs" data-tone="auto" value="96" max="100" aria-labelledby="r5-guessed-arb_Arab"></progress>
+              </div>
+              <div class="progress-field" data-recall="ind_Latn">
+                <div class="progress-header"><span class="progress-label" id="r5-guessed-ind_Latn">Indonesian <span class="badge" data-variant="outline" data-size="xs">Snowball</span></span><output class="progress-value" for="r5-bar-guessed-ind_Latn">96%</output></div>
+                <progress class="progress" id="r5-bar-guessed-ind_Latn" data-size="xs" data-tone="auto" value="96" max="100" aria-labelledby="r5-guessed-ind_Latn"></progress>
+              </div>
+              <div class="progress-field" data-recall="kor_Hang">
+                <div class="progress-header"><span class="progress-label" id="r5-guessed-kor_Hang">Korean <span class="badge" data-variant="outline" data-size="xs">bigrams</span></span><output class="progress-value" for="r5-bar-guessed-kor_Hang">96%</output></div>
+                <progress class="progress" id="r5-bar-guessed-kor_Hang" data-size="xs" data-tone="auto" value="96" max="100" aria-labelledby="r5-guessed-kor_Hang"></progress>
+              </div>
+              <div class="progress-field" data-recall="tur_Latn">
+                <div class="progress-header"><span class="progress-label" id="r5-guessed-tur_Latn">Turkish <span class="badge" data-variant="outline" data-size="xs">Snowball</span></span><output class="progress-value" for="r5-bar-guessed-tur_Latn">92%</output></div>
+                <progress class="progress" id="r5-bar-guessed-tur_Latn" data-size="xs" data-tone="auto" value="92" max="100" aria-labelledby="r5-guessed-tur_Latn"></progress>
+              </div>
+              <div class="progress-field" data-recall="ben_Beng">
+                <div class="progress-header"><span class="progress-label" id="r5-guessed-ben_Beng">Bangla <span class="badge" data-variant="outline" data-size="xs">trigrams</span></span><output class="progress-value" for="r5-bar-guessed-ben_Beng">92%</output></div>
+                <progress class="progress" id="r5-bar-guessed-ben_Beng" data-size="xs" data-tone="auto" value="92" max="100" aria-labelledby="r5-guessed-ben_Beng"></progress>
+              </div>
+              <div class="progress-field" data-recall="hin_Deva">
+                <div class="progress-header"><span class="progress-label" id="r5-guessed-hin_Deva">Hindi <span class="badge" data-variant="outline" data-size="xs">Snowball</span></span><output class="progress-value" for="r5-bar-guessed-hin_Deva">86%</output></div>
+                <progress class="progress" id="r5-bar-guessed-hin_Deva" data-size="xs" data-tone="auto" value="86" max="100" aria-labelledby="r5-guessed-hin_Deva"></progress>
               </div>
             </div>
           </div>
@@ -920,7 +1006,7 @@
     <div class="ls-ways">
       <div class="ls-way">
         <h3 class="ls-way-title"><svg class="ls-icon" aria-hidden="true"><use href="#i-package"/></svg>Package</h3>
-        <p class="ls-way-desc">Install <a class="badge" data-variant="outline" data-size="sm" href="https://www.npmjs.com/package/defuss-lexicalsearch" target="_blank" rel="noopener">npm&nbsp;<span id="use-version">v0.3.0</span><span class="sr-only"> (opens in a new tab)</span></a> with <code>npm install defuss-lexicalsearch</code>, or <code>bun add defuss-lexicalsearch</code>. Then, in Node.js or the browser:</p>
+        <p class="ls-way-desc">Install <a class="badge" data-variant="outline" data-size="sm" href="https://www.npmjs.com/package/defuss-lexicalsearch" target="_blank" rel="noopener">npm&nbsp;<span id="use-version">v0.4.0</span><span class="sr-only"> (opens in a new tab)</span></a> with <code>npm install defuss-lexicalsearch</code>, or <code>bun add defuss-lexicalsearch</code>. Then, in Node.js or the browser:</p>
         <figure class="mk-code-block" data-variant="file">
           <div class="mk-code-block-head"><span class="mk-code-block-file"><svg class="ls-icon" aria-hidden="true"><use href="#i-file"/></svg>search.js</span><button class="mk-code-block-copy" type="button" aria-label="Copy code"><svg class="ls-icon" aria-hidden="true"><use href="#i-copy"/></svg></button></div>
           <pre data-numbers><code id="usage-code"><span><span class="mk-code-block-k">import</span> { LexicalSearch } <span class="mk-code-block-k">from</span> <span class="mk-code-block-s">"defuss-lexicalsearch"</span>;</span><span></span><span><span class="mk-code-block-k">const</span> index = <span class="mk-code-block-k">new</span> LexicalSearch({ fields: { title: { weight: <span class="mk-code-block-n">3</span> }, body: {} } });</span><span>index.addAll([{ id: <span class="mk-code-block-s">"dialog"</span>, fields: { title: <span class="mk-code-block-s">"Dialog"</span>, body: <span class="mk-code-block-s">"A modal window for focused tasks."</span> } }]);</span><span></span><span><span class="mk-code-block-k">const</span> hits = index.search(<span class="mk-code-block-s">"dialgo"</span>, { fuzzy: <span class="mk-code-block-k">true</span>, transpositions: <span class="mk-code-block-k">true</span> });</span><span>console.log(hits[<span class="mk-code-block-n">0</span>].id); <span class="mk-code-block-c">// "dialog", despite the typo</span></span></code></pre>

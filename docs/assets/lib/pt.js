@@ -1,4 +1,4 @@
-import { c as createAnalyzer, n as normalizeToken, t as tokenizeJoined } from './analyzer-lEIu_Jj9.js';
+import { c as createAnalyzer, n as normalizeToken, t as tokenizeJoined } from './analyzer-CQNufUmw.js';
 import { s as stem_pt } from './pt-BTNbg2SI.js';
 import './snowball-COqm-oKm.js';
 
@@ -210,6 +210,7 @@ const DEFAULT_STOPWORDS_PT = [
 
 const pt = createAnalyzer({
   id: "pt-lexicalsearch-v1",
+  language: "pt",
   tokenize: tokenizeJoined,
   normalize: normalizeToken,
   stem: stem_pt,

@@ -5,5 +5,5 @@ import { createAnalyzer, normalizeToken, segmentWords } from './analyzer';
  * between words, so without segmentation a sentence is one token (VERIFIED: 98% R@5 segmented, 26% unsegmented, and
  * 96% with character bigrams on tiny-embedding-bench-v1).
  */
-export const th = createAnalyzer({ id: 'th-intl-word-v1', tokenize: segmentWords('th'), normalize: normalizeToken, segmented: true });
+export const th = createAnalyzer({ id: 'th-intl-word-v1', language: 'th', tokenize: segmentWords('th'), normalize: normalizeToken, segmented: true });
 export default th;

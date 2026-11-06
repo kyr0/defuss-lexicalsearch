@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.0 (2026-11-06)
+
+- Added: the search option `language`, a BCP 47 tag such as a language identifier's guess. The fields whose analyzer has that language weigh `languageBoost` times more (default 3) and every other field still matches. With defuss-lid's `major_20` guesses, R@1 on tiny-embedding-bench-v1 rises from 80.6% over all fields to 89.0%, against 90.3% with the known language.
+- Added: the analyzer property `language`; each of the 20 language entries sets its ISO 639 code. Analyzer IDs are unchanged, because tokens are.
+- Added: `make bench` measures two guessed-language strategies with defuss-lid 0.5.0 (a dev dependency): the `language` option and the guessed field alone. The website shows the guessed language as a tab, and the README's comparison table is generated from the report.
+
 ## 0.3.0 (2026-10-31)
 
 - Added: analyzers for 15 more languages, 20 in all. Snowball 3.1.1 stemmers for Russian, Polish, Indonesian, Portuguese, Italian, Dutch, Turkish, Arabic and Hindi (`defuss-lexicalsearch/ru` and so on, and `stem_ru` to `stem_tr` from `/stem`), with Snowball stopwords for Russian, Italian, Portuguese and Dutch; word segmentation for Chinese and Thai; syllable bigrams for Korean; words plus trigrams for Bangla and Urdu; tone mark folding for Vietnamese. Each generated stemmer reproduces Snowball's reference output for its whole test vocabulary.

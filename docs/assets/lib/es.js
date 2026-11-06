@@ -1,4 +1,4 @@
-import { c as createAnalyzer, n as normalizeToken, a as tokenize } from './analyzer-lEIu_Jj9.js';
+import { c as createAnalyzer, n as normalizeToken, a as tokenize } from './analyzer-CQNufUmw.js';
 import { s as stem_es } from './es-CmaGYjmH.js';
 import { s as spanishMetaphone } from './es-C7gyuI5X.js';
 import './stemmer-CH2wT9oZ.js';
@@ -47,6 +47,7 @@ const DEFAULT_STOPWORDS_ES = [
 
 const es = createAnalyzer({
   id: "es-lexicalsearch-v1",
+  language: "es",
   tokenize,
   normalize: normalizeToken,
   stem: stem_es,

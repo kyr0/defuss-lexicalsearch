@@ -9,7 +9,7 @@ import { DEFAULT_STOPWORDS_RU } from './stopwords/ru';
  * VERIFIED: snapshots persist the id and fromJSON resolves analyzers by it; change it when behavior changes.
  */
 export const ru = createAnalyzer({
-  id: 'ru-lexicalsearch-v1', tokenize: tokenizeJoined,
+  id: 'ru-lexicalsearch-v1', language: 'ru', tokenize: tokenizeJoined,
   normalize: (token: string) => normalizeToken(token).normalize('NFD').replace(/[\u0300\u0301]/g, '').normalize('NFC'),
   stem: stem_ru, stopWords: DEFAULT_STOPWORDS_RU,
 });
