@@ -83,3 +83,11 @@ Wrap: EVERY lead becomes a test | .vae/VERIFY.py rule | one MEMORY line with BC,
 2026-11-10T02:13:50Z s=b56c5c03 DONE fp=e79cd7d9cd32 cov=75.6% paths=.oxlintrc.json,ARCH.md,CHANGELOG.md,README.md(+65)
 2026-11-10T02:25:43Z s=b56c5c03 DONE fp=84e616d019f8 cov=75.6% paths=.oxlintrc.json,ARCH.md,CHANGELOG.md,README.md(+65)
 2026-11-10T02:25:43Z s=b56c5c03 FINDING docs/assets/search-worker.js:load decoder learn=none: file:// loading depends on each browser's policy (Chromium and WebKit block every file:// fetch); no portable automated check.
+2026-11-10T10:41:50Z s=b56c5c03 DONE fp=5b6b0c790637 cov=75.6% paths=.oxlintrc.json,ARCH.md,CHANGELOG.md,README.md(+65)
+2026-11-10T10:41:50Z s=b56c5c03 FINDING docs/assets/demo.css:.ls-pipeline .diagram-controls learn=test: scripts/site.mjs phone check asserts the controls fit the diagram width
+2026-11-10T10:41:50Z s=b56c5c03 FINDING docs/assets/demo.css:@container mk-footer learn=none: a visual proportion; no stable mechanical threshold beyond the screenshots
+2026-11-10T10:41:50Z s=b56c5c03 FINDING docs/assets/demo.css:.ls-flythrough learn=none: visual spacing only
+2026-11-10T10:41:50Z s=b56c5c03 FINDING docs/assets/demo.css:VERIFIED comment above html font-size learn=none: comment accuracy
+2026-11-10T10:41:50Z s=b56c5c03 FINDING CHANGELOG.md:5 P (precision) learn=none: wording
+2026-11-10T11:01:58Z s=b56c5c03 DONE fp=743158e7a507 cov=75.6% paths=.oxlintrc.json,ARCH.md,CHANGELOG.md,README.md(+65)
+2026-11-10T11:01:58Z s=b56c5c03 FINDING docs/assets/demo.css:@media (max-width: 30rem) .ls-tabs learn=none: depends on label text and font metrics; the e2e already fails on horizontal page scroll

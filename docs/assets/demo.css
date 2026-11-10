@@ -107,9 +107,9 @@
   ::view-transition-group(*.ls-hit) { animation-duration: .45s; animation-timing-function: cubic-bezier(.2, .8, .2, 1); }
   ::view-transition-old(root), ::view-transition-new(root) { animation: none; }
 
-  /* between the intro and the demo: the viewport-high stage shows only its middle band, so pull its empty
-     top and bottom into the neighbouring gaps */
-  .ls-flythrough { padding-inline: 1rem; margin-block: calc(-1 * clamp(4rem, 12vh, 9rem)); }
+  /* between the intro and the demo: the viewport-high stage shows only its middle band of 28rem, so pull its empty
+     top and bottom into the neighbouring gaps, leaving a small gap; on a phone the band is less than half the screen high */
+  .ls-flythrough { padding-inline: 1rem; margin-block: calc(clamp(1rem, 4vh, 3rem) - max(0px, (100dvh - 28rem) / 2)); }
   .ls-flythrough .parallax-stage { clip-path: inset(max(0px, calc((100dvh - 28rem) / 2)) 0 round var(--radius-xl)); }
   .ls-fly-word { margin: 0; font-size: clamp(3rem, 10vw, 6rem); font-weight: 800; letter-spacing: -.04em; background: linear-gradient(90deg, #ffd3ef, var(--chart-1)); -webkit-background-clip: text; background-clip: text; color: transparent; }
 
@@ -171,8 +171,10 @@
   }
   .ls-ad-head { display: flex; align-items: center; gap: .875rem; }
   .ls-ad-portrait { width: 5.5rem; flex: none; }
-  /* the ad is the footer's widest column on large screens */
-  @media (min-width: 64rem) { .ls-footer-nav.mk-footer-nav { grid-template-columns: 1fr 1fr 1fr 1.8fr; } }
+  /* the ad is the footer's widest column once the footer has four (from 52rem, as in defuss-shadcn) and a row of its
+     own while it has one or two */
+  @container mk-footer (width >= 52rem) { .ls-footer-nav.mk-footer-nav { grid-template-columns: 1fr 1fr 1fr 1.8fr; } }
+  @container mk-footer (width < 52rem) { .ls-footer-nav .mk-footer-col:has(> .ls-ad) { grid-column: 1 / -1; } .ls-ad { max-inline-size: 30rem; } }
   .ls-ad-portrait img { display: block; width: 100%; height: auto; }
   .ls-ad-name { margin: 0; font-size: 1.25rem; font-weight: 600; color: var(--foreground); }
   .ls-ad-role { margin: 0; font-size: .8125rem; line-height: 1.5; color: var(--muted-foreground); }
@@ -188,6 +190,12 @@
   .ls-tab-icon { width: 1.75rem; height: 1.75rem; flex: none; }
   .ls-tab-title { display: block; font-weight: 600; line-height: 1.25; }
   .ls-tab-desc { display: block; font-size: .75rem; font-weight: 400; line-height: 1.3; color: var(--muted-foreground); }
+  /* on a phone the two tabs split the full width and drop their icons, so "Documentation" fits on one line */
+  @media (max-width: 30rem) {
+    .ls-tabs .tab-list { grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; }
+    .ls-tabs .tab-list .ls-tab { padding-inline: .75rem; }
+    .ls-tabs .ls-tab-icon { display: none; }
+  }
 
   /* consulting CTA: a leaf-cornered mesh panel; portrait + heading, then the wider text column, then the action */
   .ls-consult { --shape-round: 3rem; overflow: hidden; border: 1px solid var(--border); background-color: var(--card); }
@@ -240,7 +248,10 @@
   .ls-source { margin-inline-start: auto; height: auto; padding: 0; }
   .ls-cmd-path { margin-inline-start: auto; padding-inline-start: 1rem; font-family: var(--font-mono); font-size: .6875rem; color: var(--muted-foreground); }
 
-  /* how it works: the tier ladder under the diagram, a card like the measured figures; the meter shows the strength */
+  /* how it works: the diagram's canvas scrolls sideways on a narrow screen, so its controls row stays as wide as the
+     visible part and wraps */
+  .ls-pipeline .diagram-controls { max-inline-size: 100cqi; }
+  /* the tier ladder under the diagram, a card like the measured figures; the meter shows the strength */
   .ls-tiers { margin: 2.5rem 0 0; background: var(--card); }
   .ls-tier-list { display: grid; gap: .25rem; margin: 0; list-style: none; }
   .ls-tier { display: grid; grid-template-columns: 2rem minmax(0, 1fr) 7rem; align-items: center; gap: .875rem; padding: .5rem .75rem; border-radius: var(--radius-lg); }
@@ -353,10 +364,16 @@
 
 /* One knob for the page's scale: defuss-shadcn sizes text, spacing and widths in rem, so 125 % of the browser's default
    font size makes the whole page 1.25 times larger, and a visitor's own font-size setting still scales it.
-   VERIFIED: 1,251 rem font sizes and 2 px ones in defuss-shadcn 0.9.13, none in px in this file. Phones keep 100 %:
-   at 1.25x the collapsed header needs 397 px, more than a 390 px screen offers (Chromium, 2026-11-10). */
+   VERIFIED: 1,251 rem font sizes and 2 px ones in defuss-shadcn 0.9.13, none in px in this file except the touch-screen fields below. Tablets and phones
+   (up to 1,024 px; a media query's rem is always the browser's 16 px) get three quarters of the desktop size instead:
+   93.75 %, 15 px by default. */
 html { font-size: 125%; }
-@media (max-width: 47.99rem) { html { font-size: 100%; } }
+@media (max-width: 64rem) { html { font-size: 93.75%; } }
+/* iOS Safari zooms into a focused field whose text is smaller than 16 px and stays zoomed (known WebKit behavior, not
+   tested on a device here), so touch screens keep the fields' text at 16 px whatever the scale. */
+@media (max-width: 64rem) and (pointer: coarse) {
+  input:is([type="search"], [type="text"]), textarea, select { font-size: 16px; }
+}
 /* At this scale the full header needs about 1,290 px (64.5rem) and the brand with the action buttons (Pages, theme, npm,
    GitHub) about 790 px, but defuss-shadcn shows everything from a 40rem-wide header on. Below 65rem the nav links move
    into the menu; below 42rem the action buttons follow. The thresholds are in rem, so they scale with the knob above. */

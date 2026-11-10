@@ -224,6 +224,13 @@ export async function runSite({ output }) {
       await phone.fill('#q', 'dialog');
       await phone.waitForSelector('#results > li');
       assert.ok(await phone.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'no horizontal scroll at 390 px');
+      // Tablets and phones show the page at three quarters of the desktop size (15 px root); the diagram's controls wrap inside the visible width
+      // while its canvas scrolls sideways.
+      assert.equal(await phone.evaluate(() => getComputedStyle(document.documentElement).fontSize), '15px', 'phone scale is 15 px');
+      assert.ok(await phone.evaluate(() => {
+        const controls = document.querySelector('#pipeline .diagram-controls');
+        return controls.scrollWidth <= document.getElementById('pipeline').clientWidth;
+      }), 'diagram controls fit the phone width');
       await phone.screenshot({ path: join(output, 'site-mobile.png'), fullPage: true });
       await phone.close();
     });
