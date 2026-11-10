@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>defuss-lexicalsearch · exact and ranked search in your browser</title>
   <meta name="description" content="Lexical search for JavaScript and browsers: field-weighted BM25, exact-first ranking, literal symbol matching, phrases, prefixes and typo tolerance, with zero runtime dependencies. Live demo over 410 documentation pages.">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237c8cff' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='M21 6H3M10 12H3M10 18H3'/%3E%3Ccircle cx='17' cy='15' r='3'/%3E%3Cpath d='m21 19-1.9-1.9'/%3E%3C/svg%3E">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23c547cb' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='M21 6H3M10 12H3M10 18H3'/%3E%3Ccircle cx='17' cy='15' r='3'/%3E%3Cpath d='m21 19-1.9-1.9'/%3E%3C/svg%3E">
   <script>
     // Before paint, before df$ exists (defuss-shadcn Dark Mode guide): the saved choice, else the OS default.
     let saved = '';
@@ -18,9 +18,10 @@
       document.documentElement.style.colorScheme = 'dark';
     }
   </script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/kyr0/defuss-shadcn@0.9.11/dist/components/core.min.css" integrity="sha384-qUQCm/MM2DNkdT3uEdx8Mpocj+GwXlgLat0FnWv657c16tHWOouZFT2nV7kg5pBE" crossorigin="anonymous">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/kyr0/defuss-shadcn@0.9.11/dist/theme/utils/shapes.min.css" integrity="sha384-ZmqJOMYRZyhvc1zR5eOVub6RQoBcnL3oe8ubon6JcjkLJK/0Fy3THAhfLP8K3C71" crossorigin="anonymous">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/kyr0/defuss-shadcn@0.9.11/dist/components/all.min.css" integrity="sha384-D6ChEYfIRnfJpWB03vSS4b4b1ZdHsnCNUwg2VBFrBkjDVHIVvdVDXaJ1M2hFAdK2" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/kyr0/defuss-shadcn@0.9.13/dist/components/core.min.css" integrity="sha384-qUQCm/MM2DNkdT3uEdx8Mpocj+GwXlgLat0FnWv657c16tHWOouZFT2nV7kg5pBE" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/kyr0/defuss-shadcn@0.9.13/dist/theme/utils/shapes.min.css" integrity="sha384-kvFwbKkyut1la4E1oBfImp6tvRZsBSKiVEu6vX+V1r0MIPS6LlN/52Vaa3qrAbSc" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/kyr0/defuss-shadcn@0.9.13/dist/components/all.min.css" integrity="sha384-vB1PejcxP+B7v4xfBBV7nxNuX/M3cDqmOv1bNhU/BMOlAh5h3NWG4aKtcAlws/Xh" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/kyr0/defuss-shadcn@0.9.13/dist/components/shaders.min.css" integrity="sha384-+y3ugMzY7jrZ6VYD8ynPBGVMcrM/qOaHI7Eeac//NqAtcDRBYAzHqfZcbRBN3VeP" crossorigin="anonymous">
   <link rel="stylesheet" href="assets/demo.css">
 </head>
 <body>
@@ -120,6 +121,7 @@
     </div>
     <div class="parallax-content">
       <section class="mk-hero" style="width:100%">
+        <div class="shader ls-hero-shader" data-effect="neuro-noise" data-colors="var(--chart-5) var(--chart-3) var(--chart-1)" data-background="rgb(from var(--background) r g b / .02)" data-zoom="1.35" data-fps="30" aria-hidden="true"></div>
         <div class="mk-hero-copy">
           <div class="mk-hero-pill ls-hero-pill"><a class="badge" data-variant="default" data-size="sm" href="https://www.npmjs.com/package/defuss-lexicalsearch" target="_blank" rel="noopener">npm&nbsp;<span id="hero-version">v0.4.0</span><span class="sr-only"> (opens in a new tab)</span></a><a href="#demo">No server, no API key, nothing leaves your browser <svg class="ls-icon" aria-hidden="true"><use href="#i-arrow"/></svg></a></div>
           <h1 class="mk-hero-title"><strong>Lexical</strong> search that finds the <i>exact</i> word, symbol or phrase</h1>
@@ -131,12 +133,12 @@
               <span class="ls-accent">with zero runtime dependencies</span>
               <span class="ls-accent">in your browser and Node.js</span>
           </span></span></p>
-          <p class="mk-hero-desc">defuss-lexicalsearch indexes your documents field by field and answers keyword, phrase, prefix, typo and literal queries while you type. <strong>Exact-first ranking</strong> puts the literal match on top, and <strong>field-weighted BM25</strong> orders everything after it. Indexing and search never touch the network.</p>
+          <p class="mk-hero-desc">defuss-lexicalsearch indexes your documents field by field and answers keyword, phrase, prefix, typo and literal queries while you type. <strong>Exact-first ranking</strong> puts the literal match on top, and <strong>field-weighted BM25</strong> orders everything after it. Runs isomorphic in the browser, Node.js and Bun. No search server needed.</p>
           <div class="mk-hero-actions">
             <a class="btn" data-size="lg" href="#demo" id="try-live">Try it now (live)<svg class="ls-icon" aria-hidden="true"><use href="#i-arrow-down"/></svg></a>
             <a class="btn" data-variant="outline" data-size="lg" href="#how">How it works</a>
           </div>
-          <p class="mk-hero-note">Search algorithms and engineering brought to you by <a href="https://www.linkedin.com/in/aronhomberg/" target="_blank" rel="noopener">Aron Homberg (kyr0)<svg class="ls-icon ls-ext" aria-hidden="true"><use href="#i-external"/></svg><span class="sr-only"> (opens in a new tab)</span></a> · Open Source (<a href="https://github.com/kyr0/defuss-lexicalsearch/blob/main/LICENSE" target="_blank" rel="noopener">MIT<svg class="ls-icon ls-ext" aria-hidden="true"><use href="#i-external"/></svg><span class="sr-only"> (opens in a new tab)</span></a>)</p>
+          <p class="mk-hero-note">Search algorithms and engineering brought to you by <a href="https://www.linkedin.com/in/aronhomberg/" target="_blank" rel="noopener">Aron Homberg (kyr0)<svg class="ls-icon ls-ext" aria-hidden="true"><use href="#i-external"/></svg><span class="sr-only"> (opens in a new tab)</span></a> · Open Source (<a href="https://github.com/kyr0/defuss-lexicalsearch/blob/main/LICENSE" target="_blank" rel="noopener">MIT<svg class="ls-icon ls-ext" aria-hidden="true"><use href="#i-external"/></svg><span class="sr-only"> (opens in a new tab)</span></a>)<br>Query language detection: <a href="https://lid.defuss.org" target="_blank" rel="noopener">defuss-lid<svg class="ls-icon ls-ext" aria-hidden="true"><use href="#i-external"/></svg><span class="sr-only"> (opens in a new tab)</span></a></p>
         </div>
       </section>
       <div class="ls-intro" id="intro">
@@ -168,7 +170,7 @@
         <section class="ls-intro-item" aria-labelledby="intro-6">
           <span class="ls-intro-icon" aria-hidden="true"><svg class="ls-icon"><use href="#i-languages"/></svg></span>
           <h3 id="intro-6">Many languages, many kinds of text</h3>
-          <p>Unicode words, code identifiers, raw keywords and whitespace symbols, plus analyzers for <strong>20 languages</strong>: Snowball stemming for 13, word segmentation for Japanese, Chinese and Thai, n-grams for Korean, Bangla and Urdu, and tone folding for Vietnamese.</p>
+          <p>Unicode words, code identifiers, raw keywords and whitespace symbols, plus analyzers for <strong>20 languages</strong>: stemming, word segmentation, n-grams or tone folding. When the query's language is unknown, <a href="https://lid.defuss.org" target="_blank" rel="noopener">defuss-lid<svg class="ls-icon ls-ext" aria-hidden="true"><use href="#i-external"/></svg><span class="sr-only"> (opens in a new tab)</span></a> detects it and that language's analyzer weighs most.</p>
         </section>
       </div>
     </div>
@@ -177,7 +179,7 @@
   <div class="ls-flythrough">
     <section class="parallax" data-sticky style="--parallax-length:2" aria-label="Analyze, index, rank">
       <div class="parallax-stage" style="background:radial-gradient(circle at 50% 50%, color-mix(in oklch, var(--chart-4) 50%, #05060f), #05060f 72%);color:#fff;border-radius:var(--radius-xl)">
-        <div class="parallax-layer" data-motion="zoom fade" style="--parallax-scale:6"><svg viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><rect x="140" y="140" width="120" height="120" rx="14" fill="none" stroke="#7cf0ff" stroke-width="1.5" opacity=".7"/><rect x="95" y="95" width="210" height="210" rx="22" fill="none" stroke="#b07cff" stroke-width="1" opacity=".5"/><rect x="40" y="40" width="320" height="320" rx="30" fill="none" stroke="#7c8cff" stroke-width=".8" opacity=".35"/></svg></div>
+        <div class="parallax-layer" data-motion="zoom fade" style="--parallax-scale:6"><svg viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><rect x="140" y="140" width="120" height="120" rx="14" fill="none" stroke="#e3a6ff" stroke-width="1.5" opacity=".7"/><rect x="95" y="95" width="210" height="210" rx="22" fill="none" stroke="#d370e3" stroke-width="1" opacity=".5"/><rect x="40" y="40" width="320" height="320" rx="30" fill="none" stroke="#c547cb" stroke-width=".8" opacity=".35"/></svg></div>
         <div class="parallax-layer" data-motion="pass" style="animation-range:contain 0% contain 40%;z-index:1"><p class="ls-fly-word">Analyze.</p></div>
         <div class="parallax-layer" data-motion="pass" style="animation-range:contain 30% contain 70%;z-index:2"><p class="ls-fly-word">Index.</p></div>
         <div class="parallax-layer" data-motion="pass" style="animation-range:contain 60% contain 100%;z-index:3"><p class="ls-fly-word">Rank.</p></div>
@@ -210,10 +212,10 @@
             <div class="progress-field">
               <div class="progress-header">
                 <span class="progress-label" id="p-corpus-label"><svg class="ls-icon" aria-hidden="true"><use href="#i-db"/></svg>Corpus · defuss-shadcn documentation</span>
-                <output class="progress-value" for="p-corpus" data-template="{percent} of 1,368 kB (gzip)"></output>
+                <output class="progress-value" for="p-corpus" data-template="{percent} of 905 kB (Brotli)"></output>
               </div>
               <progress class="progress" id="p-corpus" value="0" max="1367539" aria-labelledby="p-corpus-label"></progress>
-              <span class="progress-hint" id="p-corpus-hint">410 MDX pages, gzipped JSON, unpacked by the browser</span>
+              <span class="progress-hint" id="p-corpus-hint">410 MDX pages as Brotli JSON, decoded in the browser by defuss-brotli</span>
             </div>
             <div class="progress-field">
               <div class="progress-header">
@@ -316,13 +318,14 @@
             <h2 class="mk-empty-state-title" id="empty-title">Search 410 documentation pages as you type</h2>
             <p class="mk-empty-state-text">Try one of these, each showing a different kind of match, or let the demo hide a needle and find it again.</p>
             <div class="mk-empty-state-actions ls-examples" id="examples">
-              <button type="button" class="btn" data-variant="outline" data-size="sm" data-example="term">dialog</button>
-              <button type="button" class="btn" data-variant="outline" data-size="sm" data-example="phrase">"dark mode"</button>
-              <button type="button" class="btn" data-variant="outline" data-size="sm" data-example="typo">dialgo</button>
-              <button type="button" class="btn" data-variant="outline" data-size="sm" data-example="completion">scaff</button>
-              <button type="button" class="btn" data-variant="outline" data-size="sm" data-example="literal">aria-label</button>
-              <button type="button" class="btn" data-variant="outline" data-size="sm" data-example="path">pages/overlays/command.mdx</button>
+              <button type="button" class="btn ls-example" data-variant="outline" data-size="sm" data-example="term"><code>dialog</code><span class="ls-example-kind">word</span></button>
+              <button type="button" class="btn ls-example" data-variant="outline" data-size="sm" data-example="phrase"><code>"dark mode"</code><span class="ls-example-kind">phrase</span></button>
+              <button type="button" class="btn ls-example" data-variant="outline" data-size="sm" data-example="typo"><code>dialgo</code><span class="ls-example-kind">typo</span></button>
+              <button type="button" class="btn ls-example" data-variant="outline" data-size="sm" data-example="completion"><code>scaff</code><span class="ls-example-kind">completion</span></button>
+              <button type="button" class="btn ls-example" data-variant="outline" data-size="sm" data-example="literal"><code>aria-label</code><span class="ls-example-kind">substring</span></button>
+              <button type="button" class="btn ls-example" data-variant="outline" data-size="sm" data-example="path"><code>pages/overlays/command.mdx</code><span class="ls-example-kind">exact path</span></button>
             </div>
+            <hr class="separator ls-empty-divider">
             <div class="mk-empty-state-actions">
               <button type="button" class="btn" data-size="lg" data-needle><svg class="ls-icon" aria-hidden="true"><use href="#i-target"/></svg>Hide a needle and find it</button>
             </div>
@@ -471,19 +474,46 @@
           <li class="diagram-edge" data-from="match" data-to="results" data-flow="2400" data-flow-delay="1400">top k</li>
         </ol>
       </figure>
-      <div class="ls-tiers">
-        <h3 class="ls-way-title">Exact-first tiers, strongest first</h3>
-        <p class="ls-way-desc">With exact-first ranking, the weakest clause of a result decides its tier. A literal match always outranks a keyword match, however rare the words of the other result are; BM25 orders results within one tier.</p>
-        <ol class="ls-tier-list">
-          <li><span class="badge" data-variant="default" data-size="sm">literal</span> the whole original field equals the query, whitespace included</li>
-          <li><span class="badge" data-variant="default" data-size="sm">keyword</span> an exact analyzed keyword, such as a case-folded identifier</li>
-          <li><span class="badge" data-variant="secondary" data-size="sm">identifier-prefix</span> a keyword starts or ends with the query</li>
-          <li><span class="badge" data-variant="secondary" data-size="sm">term</span> the analyzed words of the query occur exactly</li>
-          <li><span class="badge" data-variant="outline" data-size="sm">partial</span> a word starts with, ends with or contains the query</li>
-          <li><span class="badge" data-variant="outline" data-size="sm">fuzzy</span> a word lies within the edit distance, or starts within it while you type</li>
-          <li><span class="badge" data-variant="outline" data-size="sm">incomplete</span> under OR, at least one query word is missing</li>
+      <figure class="card ls-tiers" aria-labelledby="tiers-title">
+        <figcaption class="card-header"><h3 class="card-title" id="tiers-title">Exact-first tiers, strongest first</h3><p class="card-description">With exact-first ranking, the weakest clause of a result decides its tier. A literal match always outranks a keyword match, however rare the words of the other result are; BM25 orders results within one tier.</p></figcaption>
+        <ol class="card-content ls-tier-list">
+          <li class="ls-tier" style="--tier:7">
+            <span class="ls-tier-rank">1</span>
+            <span class="ls-tier-text"><span class="badge" data-variant="default" data-size="sm">literal</span><span class="ls-tier-desc">the whole original field equals the query, whitespace included</span></span>
+            <span class="ls-tier-meter" aria-hidden="true"></span>
+          </li>
+          <li class="ls-tier" style="--tier:6">
+            <span class="ls-tier-rank">2</span>
+            <span class="ls-tier-text"><span class="badge" data-variant="default" data-size="sm">keyword</span><span class="ls-tier-desc">an exact analyzed keyword, such as a case-folded identifier</span></span>
+            <span class="ls-tier-meter" aria-hidden="true"></span>
+          </li>
+          <li class="ls-tier" style="--tier:5">
+            <span class="ls-tier-rank">3</span>
+            <span class="ls-tier-text"><span class="badge" data-variant="secondary" data-size="sm">identifier-prefix</span><span class="ls-tier-desc">a keyword starts or ends with the query</span></span>
+            <span class="ls-tier-meter" aria-hidden="true"></span>
+          </li>
+          <li class="ls-tier" style="--tier:4">
+            <span class="ls-tier-rank">4</span>
+            <span class="ls-tier-text"><span class="badge" data-variant="secondary" data-size="sm">term</span><span class="ls-tier-desc">the analyzed words of the query occur exactly</span></span>
+            <span class="ls-tier-meter" aria-hidden="true"></span>
+          </li>
+          <li class="ls-tier" style="--tier:3">
+            <span class="ls-tier-rank">5</span>
+            <span class="ls-tier-text"><span class="badge" data-variant="outline" data-size="sm">partial</span><span class="ls-tier-desc">a word starts with, ends with or contains the query</span></span>
+            <span class="ls-tier-meter" aria-hidden="true"></span>
+          </li>
+          <li class="ls-tier" style="--tier:2">
+            <span class="ls-tier-rank">6</span>
+            <span class="ls-tier-text"><span class="badge" data-variant="outline" data-size="sm">fuzzy</span><span class="ls-tier-desc">a word lies within the edit distance, or starts within it while you type</span></span>
+            <span class="ls-tier-meter" aria-hidden="true"></span>
+          </li>
+          <li class="ls-tier" style="--tier:1">
+            <span class="ls-tier-rank">7</span>
+            <span class="ls-tier-text"><span class="badge" data-variant="outline" data-size="sm">incomplete</span><span class="ls-tier-desc">under OR, at least one query word is missing</span></span>
+            <span class="ls-tier-meter" aria-hidden="true"></span>
+          </li>
         </ol>
-      </div>
+      </figure>
     </section>
   </section>
 
@@ -496,18 +526,18 @@
             <p class="mk-stats-desc">Your browser downloaded, unpacked and indexed the documentation above. The search worker then timed seven typical queries: after three warm-up runs, the median of 21 samples, each a batch of searches lasting about 2&nbsp;ms, since browsers round timers to 0.1&nbsp;ms. These figures come from this page load; for Node.js, <code>make bench</code> writes the same kind of report.</p>
           </div>
           <div class="mk-stats-grid">
-            <div class="mk-stat"><span class="mk-stat-value" data-bench="download"></span><span class="mk-stat-label">to download the 1,368&nbsp;kB corpus</span></div>
+            <div class="mk-stat"><span class="mk-stat-value" data-bench="download"></span><span class="mk-stat-label">to download the 905&nbsp;kB corpus</span></div>
             <div class="mk-stat"><span class="mk-stat-value" data-bench="index"></span><span class="mk-stat-label">to index 410 pages in a Web Worker</span></div>
             <div class="mk-stat"><span class="mk-stat-value" data-bench="rare"></span><span class="mk-stat-label">median search for a rare word</span></div>
             <div class="mk-stat"><span class="mk-stat-value" data-bench="typo"></span><span class="mk-stat-label">median search with typo tolerance</span></div>
           </div>
         </div>
         <figure class="mk-stats-media card ls-bench">
-          <figcaption class="card-header"><h3 class="card-title">Median latency per query type</h3><p class="card-description">Top 12 of 410 pages. The first run of an inside-word search also builds its trigram index once.</p></figcaption>
+          <figcaption class="card-header"><h3 class="card-title">Median latency per query type</h3><p class="card-description">Top 12 of 410 pages; the bars compare medians on a log scale. The first run of an inside-word search also builds its trigram index once.</p></figcaption>
           <div class="card-content">
             <table class="table ls-bench-table" data-size="sm">
-              <thead><tr><th scope="col">Query type</th><th scope="col">Query</th><th scope="col" class="ls-num">Median</th><th scope="col" class="ls-num">First run</th><th scope="col" class="ls-num">Results</th></tr></thead>
-              <tbody id="bench-rows"><tr><td colspan="5" class="ls-bench-wait">Runs once the index is ready...</td></tr></tbody>
+              <thead><tr><th scope="col">Query</th><th scope="col" class="ls-num">Median</th><th scope="col" class="ls-num ls-bench-first">First run</th><th scope="col" class="ls-num">Results</th></tr></thead>
+              <tbody id="bench-rows"><tr><td colspan="4" class="ls-bench-wait">Runs once the index is ready...</td></tr></tbody>
             </table>
           </div>
         </figure>
@@ -529,7 +559,7 @@
             <div class="mk-stat" data-recall-stat="known"><span class="mk-stat-value">97.3%</span><span class="mk-stat-label">mean R@5 over 20 languages when the question's language is known</span></div>
             <div class="mk-stat" data-recall-stat="fields"><span class="mk-stat-value">92.2%</span><span class="mk-stat-label">when each question searches all 20 language fields</span></div>
             <div class="mk-stat" data-recall-stat="en-fr-ru"><span class="mk-stat-value">100%</span><span class="mk-stat-label">R@5 for English, French, and Russian questions with the <code>en</code>, <code>fr</code>, and <code>ru</code> analyzers</span><a href="https://github.com/kyr0/defuss-lexicalsearch#retrieval-quality-by-language" class="btn mk-stat-link" data-variant="link" data-size="default" target="_blank" rel="noopener">All languages<svg class="ls-icon ls-ext" aria-hidden="true"><use href="#i-external"/></svg><span class="sr-only"> (opens in a new tab)</span></a></div>
-            <div class="mk-stat" data-recall-stat="default"><span class="mk-stat-value">74.9%</span><span class="mk-stat-label">with the default analyzer and no language setup</span></div>
+            <div class="mk-stat" data-recall-stat="size"><span class="mk-stat-value">12&nbsp;kB</span><span class="mk-stat-label">of gzipped JavaScript for the library core, with zero runtime dependencies</span></div>
           </div>
           <p class="ls-footnote">* Deterministic: the same build and runtime always return the same ranks. Measured on Node.js 26.11.1; word segmentation for Japanese, Chinese and Thai follows the runtime's ICU data (here 78.3).</p>
         </div>
@@ -537,11 +567,11 @@
           <figcaption class="card-header"><h3 class="card-title">R@5 by query language</h3><p class="card-description">Share of a language's 50 questions whose gold passage ranks in the top 5 of 2,000. The badge names how the language's analyzer works.</p></figcaption>
           <div class="card-content tabs ls-recall-tabs">
             <div class="tab-list" role="tablist" aria-label="Search strategy" id="recall-tabs">
-              <button class="tab-trigger" role="tab" aria-selected="true" aria-controls="recall-panel-known" id="recall-tab-known">Known language</button>
-              <button class="tab-trigger" role="tab" aria-selected="false" aria-controls="recall-panel-guessed" id="recall-tab-guessed" tabindex="-1">Guessed language</button>
-              <button class="tab-trigger" role="tab" aria-selected="false" aria-controls="recall-panel-fields" id="recall-tab-fields" tabindex="-1">Language fields</button>
-              <button class="tab-trigger" role="tab" aria-selected="false" aria-controls="recall-panel-typing" id="recall-tab-typing" tabindex="-1">As you type</button>
-              <button class="tab-trigger" role="tab" aria-selected="false" aria-controls="recall-panel-default" id="recall-tab-default" tabindex="-1">Default analyzer</button>
+              <button class="tab-trigger" role="tab" aria-selected="true" aria-controls="recall-panel-known" id="recall-tab-known"><span class="ls-tab-name">Known language</span><span class="ls-tab-hint">default</span></button>
+              <button class="tab-trigger" role="tab" aria-selected="false" aria-controls="recall-panel-guessed" id="recall-tab-guessed" tabindex="-1"><span class="ls-tab-name">Guessed language</span><span class="ls-tab-hint">detected</span></button>
+              <button class="tab-trigger" role="tab" aria-selected="false" aria-controls="recall-panel-fields" id="recall-tab-fields" tabindex="-1"><span class="ls-tab-name">Language fields</span><span class="ls-tab-hint">all fields</span></button>
+              <button class="tab-trigger" role="tab" aria-selected="false" aria-controls="recall-panel-typing" id="recall-tab-typing" tabindex="-1"><span class="ls-tab-name">As you type</span><span class="ls-tab-hint">fuzzy</span></button>
+              <button class="tab-trigger" role="tab" aria-selected="false" aria-controls="recall-panel-default" id="recall-tab-default" tabindex="-1"><span class="ls-tab-name">Default analyzer</span><span class="ls-tab-hint">no setup</span></button>
             </div>
           <div class="tab-content" role="tabpanel" id="recall-panel-known" aria-labelledby="recall-tab-known" tabindex="0">
             <p class="ls-recall-note">One field per language with its analyzer; a question searches its own language's field. Mean R@5: <strong data-recall-mean="known">97.3%</strong>.</p>
@@ -629,7 +659,7 @@
             </div>
           </div>
           <div class="tab-content" role="tabpanel" id="recall-panel-guessed" aria-labelledby="recall-tab-guessed" tabindex="0" hidden>
-            <p class="ls-recall-note">One field per language with its analyzer; a question searches all 20 fields with the language defuss-lid guesses as the language option, which weighs that language's field three times more. Mean R@5: <strong data-recall-mean="guessed">96.4%</strong>.</p>
+            <p class="ls-recall-note">One field per language with its analyzer; defuss-lid detects each question's language, and the language option weighs that language's field three times more, so the analyzer that fits the question decides the ranking. Mean R@5: <strong data-recall-mean="guessed">96.4%</strong>.</p>
             <div class="ls-recall-list">
               <div class="progress-field" data-recall="rus_Cyrl">
                 <div class="progress-header"><span class="progress-label" id="r5-guessed-rus_Cyrl">Russian <span class="badge" data-variant="outline" data-size="xs">Snowball</span></span><output class="progress-value" for="r5-bar-guessed-rus_Cyrl">100%</output></div>
@@ -1062,20 +1092,25 @@
             <li><a href="https://www.npmjs.com/package/defuss-lexicalsearch" target="_blank" rel="noopener">npm package<svg class="ls-icon ls-ext" aria-hidden="true"><use href="#i-external"/></svg><span class="sr-only"> (opens in a new tab)</span></a></li>
             <li><a href="https://github.com/kyr0/defuss-lexicalsearch/blob/main/ARCH.md" target="_blank" rel="noopener">Architecture<svg class="ls-icon ls-ext" aria-hidden="true"><use href="#i-external"/></svg><span class="sr-only"> (opens in a new tab)</span></a></li>
             <li><a href="https://github.com/kyr0/defuss-lexicalsearch/blob/main/CHANGELOG.md" target="_blank" rel="noopener">Changelog<svg class="ls-icon ls-ext" aria-hidden="true"><use href="#i-external"/></svg><span class="sr-only"> (opens in a new tab)</span></a></li>
+            <li><a href="https://github.com/kyr0/defuss-lexicalsearch/blob/main/LICENSE" target="_blank" rel="noopener">License <span class="badge" data-variant="outline">MIT</span><svg class="ls-icon ls-ext" aria-hidden="true"><use href="#i-external"/></svg><span class="sr-only"> (opens in a new tab)</span></a></li>
           </ul>
         </div>
         <div class="mk-footer-col">
           <h3 class="mk-footer-heading">Demo data</h3>
           <ul class="mk-footer-list">
             <li><a href="https://github.com/kyr0/defuss-shadcn/tree/896cf2ac69c53317e669604f2c28d524d947c10a/src/documentation" target="_blank" rel="noopener" id="corpus-source">defuss-shadcn documentation<svg class="ls-icon ls-ext" aria-hidden="true"><use href="#i-external"/></svg><span class="sr-only"> (opens in a new tab)</span></a></li>
-            <li><a href="https://github.com/kyr0/defuss-shadcn/blob/896cf2ac69c53317e669604f2c28d524d947c10a/LICENSE" target="_blank" rel="noopener">Its license <span class="badge" data-variant="outline">MIT</span><svg class="ls-icon ls-ext" aria-hidden="true"><use href="#i-external"/></svg><span class="sr-only"> (opens in a new tab)</span></a></li>
+            <li><a href="https://github.com/kyr0/defuss-shadcn/blob/896cf2ac69c53317e669604f2c28d524d947c10a/LICENSE" target="_blank" rel="noopener">defuss-shadcn license <span class="badge" data-variant="outline">MIT</span><svg class="ls-icon ls-ext" aria-hidden="true"><use href="#i-external"/></svg><span class="sr-only"> (opens in a new tab)</span></a></li>
           </ul>
         </div>
         <div class="mk-footer-col">
           <h3 class="mk-footer-heading">Built with</h3>
           <ul class="mk-footer-list">
-            <li><a href="https://github.com/kyr0/defuss-shadcn" target="_blank" rel="noopener">defuss-shadcn<svg class="ls-icon ls-ext" aria-hidden="true"><use href="#i-external"/></svg><span class="sr-only"> (opens in a new tab)</span></a></li>
-            <li><a href="https://github.com/kyr0/defuss-vectorsearch" target="_blank" rel="noopener">defuss-vectorsearch, its semantic sibling<svg class="ls-icon ls-ext" aria-hidden="true"><use href="#i-external"/></svg><span class="sr-only"> (opens in a new tab)</span></a></li>
+            <li><a href="https://shadcn.defuss.org" target="_blank" rel="noopener">defuss-shadcn<svg class="ls-icon ls-ext" aria-hidden="true"><use href="#i-external"/></svg><span class="sr-only"> (opens in a new tab)</span></a></li>
+            <li><a href="https://dom-router.defuss.org" target="_blank" rel="noopener">defuss-dom-router<svg class="ls-icon ls-ext" aria-hidden="true"><use href="#i-external"/></svg><span class="sr-only"> (opens in a new tab)</span></a></li>
+            <li><a href="https://vectorsearch.defuss.org" target="_blank" rel="noopener">defuss-vectorsearch<svg class="ls-icon ls-ext" aria-hidden="true"><use href="#i-external"/></svg><span class="sr-only"> (opens in a new tab)</span></a></li>
+            <li><a href="https://brotli.defuss.org" target="_blank" rel="noopener">defuss-brotli<svg class="ls-icon ls-ext" aria-hidden="true"><use href="#i-external"/></svg><span class="sr-only"> (opens in a new tab)</span></a></li>
+            <li><a href="https://lid.defuss.org" target="_blank" rel="noopener">defuss-lid<svg class="ls-icon ls-ext" aria-hidden="true"><use href="#i-external"/></svg><span class="sr-only"> (opens in a new tab)</span></a></li>
+            <li><a href="https://vae.defuss.org" target="_blank" rel="noopener">defuss-vae<svg class="ls-icon ls-ext" aria-hidden="true"><use href="#i-external"/></svg><span class="sr-only"> (opens in a new tab)</span></a></li>
           </ul>
         </div>
         <div class="mk-footer-col">
@@ -1122,7 +1157,8 @@
   </div>
 </dialog>
 
-<script type="module" src="https://cdn.jsdelivr.net/gh/kyr0/defuss-shadcn@0.9.11/dist/components/all.min.js" integrity="sha384-smU3aE2UPGvVE+nQS/ekmmE86ccjq2yap/zPMBoITba6SOq71Fil6vo4HZHaFZRY" crossorigin="anonymous"></script>
+<script type="module" src="https://cdn.jsdelivr.net/gh/kyr0/defuss-shadcn@0.9.13/dist/components/all.min.js" integrity="sha384-TmkH79IpYKAuexQw5i80JoentBsM0UsBg74rGr0zKEj2iNQwuCmWWRulohr0Z0as" crossorigin="anonymous"></script>
+<script type="module" src="https://cdn.jsdelivr.net/gh/kyr0/defuss-shadcn@0.9.13/dist/components/shaders.min.js" integrity="sha384-dPWu1F8nFNKt5r6WTNrSYJWS+EdP+0D/lSBqFkKnli8b68mvzXjcr50YfXDGk7LA" crossorigin="anonymous"></script>
 <script type="module" src="assets/demo.js"></script>
 </body>
 </html>

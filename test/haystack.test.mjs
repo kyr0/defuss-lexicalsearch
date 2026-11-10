@@ -1,12 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { gunzipSync } from 'node:zlib';
+import { brotliDecompressSync } from 'node:zlib';
 import { LexicalSearch, keywordAnalyzer } from '../dist/index.js';
 
 // Haystack: 410 MDX pages (8 MB) of defuss-shadcn documentation at one commit, the same file the website demo searches;
 // it carries its source URL and MIT license. Rebuild it with scripts/haystack-fixture.mjs.
-const fixture = JSON.parse(gunzipSync(readFileSync(new URL('../docs/data/defuss-shadcn-docs.json.gz', import.meta.url))));
+const fixture = JSON.parse(brotliDecompressSync(readFileSync(new URL('../docs/data/defuss-shadcn-docs.json.br', import.meta.url))));
 const page = ({ path, text }) => {
   const front = /^---\n([\s\S]*?)\n---\n/.exec(text);
   const meta = Object.fromEntries([...(front?.[1] ?? '').matchAll(/^(\w+):\s*"?(.*?)"?\s*$/gm)].map(([, key, value]) => [key, value]));

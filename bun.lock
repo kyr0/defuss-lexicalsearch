@@ -5,6 +5,7 @@
     "": {
       "name": "defuss-lexicalsearch",
       "devDependencies": {
+        "defuss-brotli": "0.4.0",
         "defuss-lid": "0.5.0",
         "oxlint": "1.90.0",
         "pkgroll": "2.29.0",
@@ -189,6 +190,8 @@
     "commondir": ["commondir@1.0.1", "", {}, "sha512-W9pAhw0ja1Edb5GVdIF1mjZw/ASI0AlShXM83UUGe2DVr5TdAPEA1OA8m/g8zWp9x6On7gqufY+FatDbC3MDQg=="],
 
     "deepmerge": ["deepmerge@4.3.1", "", {}, "sha512-3sUqbMEc77XqpdNO7FRyRog+eW3ph+GYCbj+rK+uYyRMuwsVy0rMiVtPn+QJlKFvWP/1PYpapqYn0Me2knFn+A=="],
+
+    "defuss-brotli": ["defuss-brotli@0.4.0", "", { "bin": { "defuss-brotli": "dist/cli.js" } }, "sha512-yLOBlcYq7C1/kqs6EBKZuzeIKHvGR6Y284NpSnbeCArC9MZ4bJU+8ixEPi+IS65Dz7hcDBs1Ix57FPRDFKwD8w=="],
 
     "defuss-lid": ["defuss-lid@0.5.0", "", { "peerDependencies": { "cld3-asm": "4.0.0" }, "optionalPeers": ["cld3-asm"] }, "sha512-Oo7Id28uvBESioIZBDWJMC8JfryFyvh3D2/mZh0SKTPfg5MrCE0XLbxfWsJe8eOnJeXm4n8rSsZbxV4WF6eCzA=="],
 

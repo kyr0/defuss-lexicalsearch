@@ -261,6 +261,7 @@
     "prepack": "tsc --noEmit && pkgroll --clean-dist"
   },
   "devDependencies": {
+    "defuss-brotli": "0.4.0",
     "defuss-lid": "0.5.0",
     "oxlint": "1.90.0",
     "pkgroll": "2.29.0",

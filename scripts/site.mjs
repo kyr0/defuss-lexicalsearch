@@ -23,7 +23,7 @@ export async function runSite({ output }) {
   // VERIFIED: the recall section is rendered from docs/data/recall.json, measured by bench/recall.mjs with this version.
   const recall = JSON.parse(await readFile(join(root, 'docs/data/recall.json'), 'utf8'));
   assert.equal(recall.version, manifest.version, 'docs/data/recall.json was measured with another version: run make docs');
-  assert.ok(raw.includes(renderRecall(recall)), 'docs/index.html recall section differs from docs/data/recall.json: run make docs');
+  assert.ok(raw.includes(renderRecall(recall, manifest)), 'docs/index.html recall section differs from docs/data/recall.json: run make docs');
   // The static markup carries the same figures the manifest holds, so the page reads right before the worker reports.
   for (const figure of [kb(manifest.library.coreGzipBytes), kb(manifest.corpus.bytes), mb(manifest.corpus.textBytes), `v${manifest.version}`, `${manifest.corpus.pages} pages`]) {
     assert.ok(html.includes(figure), `docs/index.html must state ${figure} (docs/data/manifest.json)`);

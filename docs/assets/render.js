@@ -71,19 +71,32 @@ export const renderSectionOptions = sections => `<option value="all" selected>Al
 export const renderLogLine = (tone, text) =>
   `<pre data-prefix="${tone === 'success' ? '✓' : tone === 'warning' ? '!' : tone === 'destructive' ? '✗' : '>'}" data-tone="${tone}" data-cursor><code>${escape(text)}</code></pre>`;
 
+/** The work of one search as badges, the figure in mono: its time (pink), the postings visited and the expanded terms. */
+export const renderSearchStats = ({ ms, stats }) => {
+  const count = (n, word) => `<span class="ls-summary-figure">${n.toLocaleString('en')}</span> ${word}${n === 1 ? '' : 's'}`;
+  return [
+    ['ls-summary-took', `<span class="ls-summary-figure">${formatMs(ms)}</span>`],
+    ['', `${count(stats.postingsVisited, 'posting')} visited`],
+    ['', count(stats.expandedTerms, 'term')],
+  ].map(([extra, html]) => `<span class="badge ls-summary-stat ${extra}" data-variant="outline" data-size="sm">${html}</span>`).join(' ');
+};
+
 /** The search options of a benchmark row in words: one badge per option a visitor would switch on. */
 const optionNames = options => Object.entries(options).flatMap(([key, value]) =>
   key === 'fields' ? [`${value.join(', ')} only`] : key === 'mode' ? [`${value} mode`] : key === 'prefix' ? ['completion']
     : key === 'fuzzy' ? ['typos'] : key === 'substring' ? ['inside words'] : []);
 
-/** Benchmark rows: label, query and options, median latency, first-run latency and result count. */
-export const renderBenchRows = rows => rows.map(row => `<tr>
-  <th scope="row">${escape(row.label)}</th>
-  <td><code>${escape(row.query)}</code>${optionNames(row.options).map(name => ` <span class="badge" data-variant="outline" data-size="sm">${escape(name)}</span>`).join('')}</td>
-  <td class="ls-num" data-bench-p50>${formatMs(row.p50)}</td>
-  <td class="ls-num">${formatMs(row.firstMs)}</td>
+/** Benchmark rows: label with its query and options, median latency with a bar on a log scale, first run, result count. */
+export const renderBenchRows = rows => {
+  const logs = rows.map(row => Math.log10(Math.max(row.p50, 1e-6)));
+  const low = Math.min(...logs) - .5, high = Math.max(...logs);
+  return rows.map((row, i) => `<tr>
+  <th scope="row"><span class="ls-bench-type">${escape(row.label)}</span><span class="ls-bench-query"><code>${escape(row.query)}</code>${optionNames(row.options).map(name => `<span class="badge" data-variant="outline" data-size="xs">${escape(name)}</span>`).join('')}</span></th>
+  <td class="ls-num ls-bench-median"><span data-bench-p50>${formatMs(row.p50)}</span><span class="ls-bench-bar" style="--share:${(100 * (logs[i] - low) / (high - low)).toFixed(1)}%" aria-hidden="true"></span><span class="ls-bench-first-inline">first ${formatMs(row.firstMs)}</span></td>
+  <td class="ls-num ls-bench-first">${formatMs(row.firstMs)}</td>
   <td class="ls-num">${row.total.toLocaleString('en')}</td>
 </tr>`).join('');
+};
 
 /** A sticky note: a native textarea and a status line the board fills in. */
 export const renderNote = (id, n) => `<article class="ls-note" id="${id}" data-df-entrance="pop">

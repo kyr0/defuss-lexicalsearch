@@ -3,6 +3,7 @@
 // Why a worker: the library's API is synchronous (ARCH.md); indexing 8 MB on the main thread would freeze the page.
 // VERIFIED: scripts/site.mjs drives every message type below in Chromium.
 import { LexicalSearch, codeAnalyzer, keywordAnalyzer, unicodeAnalyzer } from './lib/index.js';
+import { init as initBrotli, decompressText } from './vendor/defuss-brotli/decompressor-slim.js';
 
 const WORD = /[\p{L}\p{N}][\p{L}\p{N}\p{M}]*/gu;
 const FIELDS = ['body', 'description', 'title'];
@@ -113,6 +114,14 @@ const searchOptions = options => {
 const handlers = {
   async load({ manifestUrl }) {
     const started = now();
+    // The decoder's WebAssembly loads while the corpus downloads; decoding waits for both. The worker fetches the bytes
+    // itself: init() without an argument refuses a file:// URL in a browser, so a page opened from disk would fail.
+    const decoderStarted = now();
+    const wasm = fetch(new URL('./vendor/defuss-brotli/decompressor.wasm', import.meta.url)).then(response => {
+      if (!response.ok && response.status !== 0) throw new Error(`Brotli decoder download failed: HTTP ${response.status}`);
+      return response.arrayBuffer();
+    });
+    const decoder = wasm.then(bytes => initBrotli(bytes)).then(() => now() - decoderStarted);
     const manifest = await (await fetch(manifestUrl)).json();
     const response = await fetch(new URL(manifest.corpus.file, manifestUrl));
     if (!response.ok || !response.body) throw new Error(`Corpus download failed: HTTP ${response.status}`);
@@ -130,11 +139,16 @@ const handlers = {
     let offset = 0;
     for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.byteLength; }
     const downloadMs = now() - started;
-    // GitHub Pages serves the .gz file as stored; a server that adds Content-Encoding hands over plain JSON instead.
-    const gzip = bytes[0] === 0x1f && bytes[1] === 0x8b;
-    const json = gzip ? await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'))).text() : new TextDecoder().decode(bytes);
+    // GitHub Pages serves the .br file as stored; a server that adds Content-Encoding: br hands over plain JSON instead.
+    // Browsers offer JavaScript no Brotli decoder (DecompressionStream has none), so defuss-brotli decodes it.
+    const brotli = bytes[0] !== 0x7b;
+    const decoderMs = await decoder;
+    const decodeStarted = now();
+    const json = brotli ? decompressText(bytes) : new TextDecoder().decode(bytes);
+    const decodeMs = now() - decodeStarted;
     const list = JSON.parse(json).documents.map(parsePage);
-    log('info', `corpus · ${list.length} pages · ${(loaded / 1e6).toFixed(2)} MB in ${Math.round(downloadMs)} ms${gzip ? ' · gunzip in the browser' : ''}`);
+    log('info', `decoder · ${manifest.decoder.name} ${manifest.decoder.version} · ${(manifest.decoder.bytes / 1e3).toFixed(0)} kB WebAssembly and JavaScript ready in ${Math.round(decoderMs)} ms`);
+    log('info', `corpus · ${list.length} pages · ${(loaded / 1e6).toFixed(2)} MB in ${Math.round(downloadMs)} ms${brotli ? ` · Brotli decoded in ${Math.round(decodeMs)} ms` : ''}`);
     phase('index');
     const indexStarted = now();
     corpus = new LexicalSearch({

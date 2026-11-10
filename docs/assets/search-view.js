@@ -2,7 +2,7 @@
 // in the worker ("docs" or "notes"). Both tabs use it, so both search the same way and animate the same way.
 // Why a factory over two copies: the stale-result check, the transition queue and the before-the-index path are the
 // subtle parts; one implementation keeps them identical. VERIFIED: scripts/site.mjs drives both tabs.
-import { formatMs, plural, renderSkeletons } from './render.js';
+import { renderSearchStats, renderSkeletons } from './render.js';
 
 const motion = matchMedia('(prefers-reduced-motion: reduce)');
 
@@ -98,8 +98,7 @@ export const createSearchView = ({ index, root, worker, isReady, options = () =>
       const extra = note(data);
       badge.hidden = !extra;
       badge.textContent = extra;
-      summary.querySelector('.mk-search-summary-time').textContent =
-        `${formatMs(data.ms)} · ${plural(data.stats.postingsVisited, 'posting')} visited · ${plural(data.stats.expandedTerms, 'term')}`;
+      summary.querySelector('.mk-search-summary-time').innerHTML = renderSearchStats(data);
       summary.hidden = false;
       empty.hidden = true;
       onShown(data);

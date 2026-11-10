@@ -31,7 +31,7 @@ const applyManifest = ({ version, library, corpus }) => {
   $('intro-size').textContent = kb(library.coreGzipBytes);
   $('demo-pages').textContent = corpus.pages.toLocaleString('en');
   $('demo-text').textContent = mb(corpus.textBytes);
-  document.querySelector('output[for="p-corpus"]').dataset.template = `{percent} of ${kb(corpus.bytes)} (gzip)`;
+  document.querySelector('output[for="p-corpus"]').dataset.template = `{percent} of ${kb(corpus.bytes)} (Brotli)`;
   el.corpus.max = corpus.bytes;
 };
 

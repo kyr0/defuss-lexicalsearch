@@ -207,7 +207,7 @@
     {
       "id": "guessed",
       "name": "Guessed language",
-      "description": "One field per language with its analyzer; a question searches all 20 fields with the language defuss-lid guesses as the language option, which weighs that language's field three times more.",
+      "description": "One field per language with its analyzer; defuss-lid detects each question's language, and the language option weighs that language's field three times more, so the analyzer that fits the question decides the ranking.",
       "r1": 0.89,
       "r5": 0.9639999999999999,
       "languages": {

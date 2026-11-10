@@ -54,7 +54,7 @@ export const STRATEGIES = [
   { id: 'known', name: 'Known language', perLanguage: true, own: true, options: {},
     description: "One field per language with its analyzer; a question searches its own language's field." },
   { id: 'guessed', name: 'Guessed language', perLanguage: true, guess: 'boost', options: {},
-    description: "One field per language with its analyzer; a question searches all 20 fields with the language defuss-lid guesses as the language option, which weighs that language's field three times more." },
+    description: "One field per language with its analyzer; defuss-lid detects each question's language, and the language option weighs that language's field three times more, so the analyzer that fits the question decides the ranking." },
   { id: 'guessed-field', name: 'Guessed field only', perLanguage: true, guess: 'field', options: {},
     description: "One field per language with its analyzer; a question searches only the field of the language defuss-lid guesses." },
   { id: 'typing', name: 'As you type', perLanguage: true, own: true, options: { prefix: true, substring: true, fuzzy: true, transpositions: true },

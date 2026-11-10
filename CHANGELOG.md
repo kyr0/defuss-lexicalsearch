@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Website: colored with the pink of the defuss-vectorsearch site instead of blue, with defuss-shadcn 0.9.13 and its neuro-noise shader in the hero. The R@5 tabs show each strategy's name over a one-word hint (default, detected, all fields, fuzzy, no setup) instead of cut-off names, and the fourth tile next to them shows the library's 12 kB gzipped size instead of the default analyzer's R@5; the latency table puts each query under its type, adds a bar per median on a log scale, and on a phone moves the first run under the median; the exact-first tiers are a card with a strength meter per tier; the demo's examples name their kind of match, one per row above the needle button; a search's time, postings visited and expanded terms show as badges, the time in pink. The hero and the languages intro say that defuss-lid detects an unknown query language for the `language` option; the footer links the license (MIT) under Project and each defuss project it is built with on its defuss.org site. The demo corpus is Brotli instead of gzip, 905 kB instead of 1,368 kB, compressed by defuss-brotli (`scripts/haystack-fixture.mjs`) and decoded by its WebAssembly decoder in the search worker. The consulting text is brighter. From 768 px of viewport width the whole page is 1.25 times larger (root font size 125 %), with the header's nav links in its menu below 1,300 px; phones keep the default size.
+
 ## 0.4.0 (2026-11-06)
 
 - Added: the search option `language`, a BCP 47 tag such as a language identifier's guess. The fields whose analyzer has that language weigh `languageBoost` times more (default 3) and every other field still matches. With defuss-lid's `major_20` guesses, R@1 on tiny-embedding-bench-v1 rises from 80.6% over all fields to 89.0%, against 90.3% with the known language.

@@ -468,7 +468,7 @@ make setup && make verify
 | `make coverage` | line coverage of the built ESM modules, printed as `TOTAL <n>%` |
 | `make e2e` | packs the tarball and checks that it holds only `package.json`, `README.md`, `LICENSE` and build files that an export reaches, installs it in a clean consumer under `tmp/`, runs it on Node.js and bun, drives the examples and the Worker in Chromium, then drives every section of the website with the packed build and runs the website's usage snippet on both runtimes; writes `output/e2e/report.json` and screenshots |
 
-`make` lists every verb. The haystack `docs/data/defuss-shadcn-docs.json.gz`, also the website's demo corpus, is a snapshot of defuss-shadcn's documentation at one commit and carries that project's MIT license; `node scripts/haystack-fixture.mjs <commit>` rebuilds it. Start reading the code from [ARCH.md](ARCH.md).
+`make` lists every verb. The haystack `docs/data/defuss-shadcn-docs.json.br`, also the website's demo corpus, Brotli-compressed by defuss-brotli, is a snapshot of defuss-shadcn's documentation at one commit and carries that project's MIT license; `node scripts/haystack-fixture.mjs <commit>` rebuilds it. Start reading the code from [ARCH.md](ARCH.md).
 
 ## License
 

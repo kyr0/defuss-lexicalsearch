@@ -66,3 +66,20 @@ Wrap: EVERY lead becomes a test | .vae/VERIFY.py rule | one MEMORY line with BC,
 2026-11-06T11:42:51Z s=a22aa615 FINDING src/engine.ts:245 weightOf learn=none: Review confirmation, no defect.
 2026-11-06T13:04:35Z s=a22aa615 DONE fp=f7de01ca4d87 cov=75.6% paths=ARCH.md,CHANGELOG.md,README.md,bench/recall.mjs(+57)
 2026-11-06T13:04:35Z s=a22aa615 FINDING package.json:3; CHANGELOG.md:3; docs/index.html version badges learn=none: Existing site.mjs and recall version checks cover it.
+2026-11-10T01:24:34Z s=b56c5c03 DONE fp=94e46ec841f8 cov=75.6% paths=ARCH.md,CHANGELOG.md,README.md,bench/recall.mjs(+56)
+2026-11-10T01:40:19Z s=b56c5c03 DONE fp=1647e956ed86 cov=75.6% paths=ARCH.md,CHANGELOG.md,README.md,bench/recall.mjs(+58)
+2026-11-10T01:40:19Z s=b56c5c03 FINDING docs/assets/demo.css:latency table at 390 px learn=none: A layout fit at one viewport is a visual judgment; site.mjs checks the phone viewport for errors, not for clipped columns.
+2026-11-10T01:40:19Z s=b56c5c03 FINDING docs/assets/demo.css:pink tokens learn=none: The CSS comment at the override records why it is unlayered; no rule kind can check cascade layers.
+2026-11-10T01:46:29Z s=b56c5c03 DONE fp=ad91a5541bd7 cov=75.6% paths=ARCH.md,CHANGELOG.md,README.md,bench/recall.mjs(+59)
+2026-11-10T01:46:29Z s=b56c5c03 FINDING docs/assets/render.js:renderSearchStats learn=none: A one-off markup detail of this renderer; no rule kind distinguishes it from intended adjacency.
+2026-11-10T01:50:35Z s=b56c5c03 DONE fp=ea9849b037a9 cov=75.6% paths=ARCH.md,CHANGELOG.md,README.md,bench/recall.mjs(+59)
+2026-11-10T01:50:35Z s=b56c5c03 FINDING docs/index.html:footer Demo data learn=none: Glyph ambiguity of a label is a copy judgment, not a mechanically checkable invariant.
+2026-11-10T01:55:57Z s=b56c5c03 FAIL lint
+2026-11-10T02:01:23Z s=b56c5c03 FAIL tests.e2e.1
+2026-11-10T02:04:56Z s=b56c5c03 DONE fp=9a438868141f cov=75.6% paths=.oxlintrc.json,ARCH.md,CHANGELOG.md,README.md(+65)
+2026-11-10T02:04:56Z s=b56c5c03 FINDING .oxlintrc.json:ignorePatterns learn=none: The lint gate itself catches a new unignored vendored file; nothing further to mechanize.
+2026-11-10T02:04:56Z s=b56c5c03 FINDING docs/assets/demo.css:@container mk-header learn=none: Thresholds depend on the header's content; site.mjs already exercises the header controls at 1280 px.
+2026-11-10T02:04:56Z s=b56c5c03 FINDING scripts/haystack-fixture.mjs:defuss-brotli learn=memory: CLI_GIST fixture line updated to the .json.br path and byte-identical rebuild.
+2026-11-10T02:13:50Z s=b56c5c03 DONE fp=e79cd7d9cd32 cov=75.6% paths=.oxlintrc.json,ARCH.md,CHANGELOG.md,README.md(+65)
+2026-11-10T02:25:43Z s=b56c5c03 DONE fp=84e616d019f8 cov=75.6% paths=.oxlintrc.json,ARCH.md,CHANGELOG.md,README.md(+65)
+2026-11-10T02:25:43Z s=b56c5c03 FINDING docs/assets/search-worker.js:load decoder learn=none: file:// loading depends on each browser's policy (Chromium and WebKit block every file:// fetch); no portable automated check.

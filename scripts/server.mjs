@@ -6,12 +6,12 @@ import { fileURLToPath } from 'node:url';
 const root = fileURLToPath(new URL('../', import.meta.url));
 const types = {
   '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json', '.css': 'text/css',
-  '.gz': 'application/gzip', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml',
+  '.br': 'application/octet-stream', '.wasm': 'application/wasm', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml',
 };
 
 /**
  * Serves the website (docs/) at /, the examples at /examples/ and a build directory at /dist/; e2e maps /dist/ to the
- * installed package. Like GitHub Pages, it sends .gz files as stored, without Content-Encoding.
+ * installed package. Like GitHub Pages, it sends .br files as stored, without Content-Encoding.
  * VERIFIED: repository files such as /package.json and /.git/config return 404 (asserted in scripts/browser.mjs).
  */
 export async function serve({ port = 0, dist = resolve(root, 'dist') } = {}) {

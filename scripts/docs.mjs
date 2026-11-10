@@ -1,14 +1,17 @@
 import { copyFile, mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises';
-import { join } from 'node:path';
+import { basename, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { gunzipSync, gzipSync } from 'node:zlib';
+import { brotliDecompressSync, gzipSync } from 'node:zlib';
 
 // Generates the website's built parts in docs/ (GitHub Pages serves that folder as is, without a build step):
-// assets/lib/ is the package's ESM build, which the search worker imports natively, and data/manifest.json holds the
-// figures the page shows. e2e passes the installed package's dist/, so the site runs the packed artifact.
+// assets/lib/ is the package's ESM build, which the search worker imports natively, assets/vendor/defuss-brotli/ the
+// Brotli decoder that unpacks the corpus in the worker, and data/manifest.json holds the figures the page shows. e2e passes the installed package's dist/, so the site runs the packed artifact.
 // VERIFIED: scripts/site.mjs compares every figure on the page with this manifest.
 const root = fileURLToPath(new URL('../', import.meta.url));
-const CORPUS = 'defuss-shadcn-docs.json.gz';
+const CORPUS = 'defuss-shadcn-docs.json.br';
+// The decoder only, without the encoder: its JavaScript and the WebAssembly binary its init() loads from next to it.
+const BROTLI = ['dist/decompressor-slim.js', 'dist/decompressor.wasm'];
+const BROTLI_NOTICES = ['LICENSE', 'THIRD_PARTY_NOTICES.txt'];
 
 /** An ESM entry plus every file it reaches through relative static or dynamic imports. */
 const reachable = async (dir, entry, seen = new Set()) => {
@@ -24,13 +27,22 @@ export async function buildSite(dist = join(root, 'dist')) {
   await mkdir(lib, { recursive: true });
   const files = (await readdir(dist)).filter(file => file.endsWith('.js')).sort();
   for (const file of files) await copyFile(join(dist, file), join(lib, file));
+  const vendor = join(root, 'docs/assets/vendor/defuss-brotli');
+  await rm(vendor, { recursive: true, force: true });
+  await mkdir(vendor, { recursive: true });
+  const brotli = join(root, 'node_modules/defuss-brotli');
+  for (const file of [...BROTLI, ...BROTLI_NOTICES]) await copyFile(join(brotli, file), join(vendor, basename(file)));
   const core = await Promise.all([...await reachable(dist, 'index.js')].map(file => readFile(join(dist, file))));
   const packed = await readFile(join(root, 'docs/data', CORPUS));
-  const corpus = JSON.parse(gunzipSync(packed));
+  const corpus = JSON.parse(brotliDecompressSync(packed));
   const { version } = JSON.parse(await readFile(join(dist, '../package.json'), 'utf8'));
   const manifest = {
     version,
     library: { files: files.length, coreBytes: core.reduce((n, bytes) => n + bytes.length, 0), coreGzipBytes: core.reduce((n, bytes) => n + gzipSync(bytes, { level: 9 }).length, 0) },
+    decoder: {
+      name: 'defuss-brotli', version: JSON.parse(await readFile(join(brotli, 'package.json'), 'utf8')).version,
+      bytes: (await Promise.all(BROTLI.map(file => readFile(join(vendor, basename(file)))))).reduce((n, bytes) => n + bytes.length, 0),
+    },
     corpus: {
       file: CORPUS, source: corpus.source, pages: corpus.documents.length, bytes: packed.length,
       textBytes: corpus.documents.reduce((n, { text }) => n + Buffer.byteLength(text), 0),
@@ -46,16 +58,20 @@ const ext = '<svg class="ls-icon ls-ext" aria-hidden="true"><use href="#i-extern
 
 /** The strategies of bench/recall.mjs the website shows as tabs; the README's guess table also compares 'guessed-field'. */
 export const RECALL_TABS = ['known', 'guessed', 'fields', 'typing', 'default'];
+/** Each tab's second line: what sets the strategy apart, in a word or two. */
+const TAB_HINTS = { known: 'default', guessed: 'detected', fields: 'all fields', typing: 'fuzzy', default: 'no setup' };
 
 /**
  * The "Measured, not promised" section: R@5 per query language for each strategy in RECALL_TABS, one tab per
- * strategy, languages sorted by R@5. Static markup, so the figures read right without JavaScript.
+ * strategy, languages sorted by R@5, and the library's gzipped size from the site manifest. Static markup, so the figures
+ * read right without JavaScript.
  */
-export function renderRecall(recall) {
+export function renderRecall(recall, manifest) {
   const strategy = id => recall.strategies.find(s => s.id === id);
   const order = RECALL_TABS.map(strategy);
   const codes = Object.keys(recall.languages);
-  const tabs = order.map((s, i) => `<button class="tab-trigger" role="tab" aria-selected="${i === 0}" aria-controls="recall-panel-${s.id}" id="recall-tab-${s.id}"${i ? ' tabindex="-1"' : ''}>${escape(s.name)}</button>`);
+  // Five tabs fit the card as a grid: the name, which may wrap, over a short hint; each panel states its mean R@5.
+  const tabs = order.map((s, i) => `<button class="tab-trigger" role="tab" aria-selected="${i === 0}" aria-controls="recall-panel-${s.id}" id="recall-tab-${s.id}"${i ? ' tabindex="-1"' : ''}><span class="ls-tab-name">${escape(s.name)}</span><span class="ls-tab-hint">${escape(TAB_HINTS[s.id])}</span></button>`);
   const panels = order.map((s, i) => {
     const sorted = [...codes].sort((a, b) => s.languages[b] - s.languages[a] || codes.indexOf(a) - codes.indexOf(b));
     const bars = sorted.map(code => {
@@ -91,7 +107,7 @@ export function renderRecall(recall) {
             <div class="mk-stat" data-recall-stat="known"><span class="mk-stat-value">${percent(strategy('known').r5, 1)}</span><span class="mk-stat-label">mean R@5 over ${codes.length} languages when the question's language is known</span></div>
             <div class="mk-stat" data-recall-stat="fields"><span class="mk-stat-value">${percent(strategy('fields').r5, 1)}</span><span class="mk-stat-label">when each question searches all ${codes.length} language fields</span></div>
             <div class="mk-stat" data-recall-stat="en-fr-ru"><span class="mk-stat-value">${percent(Math.min(...top))}</span><span class="mk-stat-label">${top.every(value => value === top[0]) ? '' : 'at least '}R@5 for English, French, and Russian questions with the <code>en</code>, <code>fr</code>, and <code>ru</code> analyzers</span><a href="https://github.com/kyr0/defuss-lexicalsearch#retrieval-quality-by-language" class="btn mk-stat-link" data-variant="link" data-size="default" target="_blank" rel="noopener">All languages${ext}</a></div>
-            <div class="mk-stat" data-recall-stat="default"><span class="mk-stat-value">${percent(strategy('default').r5, 1)}</span><span class="mk-stat-label">with the default analyzer and no language setup</span></div>
+            <div class="mk-stat" data-recall-stat="size"><span class="mk-stat-value">${Math.round(manifest.library.coreGzipBytes / 1e3)}&nbsp;kB</span><span class="mk-stat-label">of gzipped JavaScript for the library core, with zero runtime dependencies</span></div>
           </div>
           <p class="ls-footnote">* Deterministic: the same build and runtime always return the same ranks. Measured on Node.js ${escape(recall.node.slice(1))}; word segmentation for Japanese, Chinese and Thai follows the runtime's ICU data (here ${escape(recall.icu)}).</p>
         </div>
@@ -170,6 +186,7 @@ export function renderLanguageGlance(recall) {
 /** Replaces the generated recall parts of docs/index.html and README.md; returns the files that changed. */
 export async function writeRecall(recall) {
   const changed = [];
+  const manifest = JSON.parse(await readFile(join(root, 'docs/data/manifest.json'), 'utf8'));
   for (const [file, pattern, render] of [
     ['docs/index.html', /<!-- recall:start -->[\s\S]*<!-- recall:end -->/, renderRecall],
     ['README.md', /<!-- recall-table:start -->[\s\S]*<!-- recall-table:end -->/, renderRecallTable],
@@ -178,7 +195,7 @@ export async function writeRecall(recall) {
   ]) {
     const text = await readFile(join(root, file), 'utf8');
     if (!pattern.test(text)) throw new Error(`${file} lacks the generated recall markers`);
-    const next = text.replace(pattern, () => render(recall));
+    const next = text.replace(pattern, () => render(recall, manifest));
     if (next !== text) { await writeFile(join(root, file), next); changed.push(file); }
   }
   return changed;
